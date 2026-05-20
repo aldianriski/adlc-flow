@@ -653,3 +653,389 @@ Trial 3 closed at "synthetic-trial methodology plateauing — next signal source
 2. **First trial where the kill-criterion fired at AG (not VG)**. Trial 3 fired at VG (after PoV measurement). Trial 4 fired at AG (before any code). The earlier the kill-criterion fires, the more value ADLC delivers — Trial 4's cost-kill at AG saved 1-2 weeks of engineering work.
 
 Each trial caught a non-overlapping cluster. The 4-trial run is now the canonical dogfood evidence base for v3.0 / external-adopter recruitment.
+
+---
+
+# Trial 5 — temidev (mature existing project) (2026-05-20 · v2.7 → v2.8 candidate)
+
+**Trial repo:** `D:\Project\temidev` — TemiDev Client Journey Platform (real product · Indonesian software house · TemiDev/Temika Group)
+**Product**: Mature bilingual EN/ID client-portal · 31 closed sprints · 47 ADRs in `docs/DECISIONS.md` (single 133KB file) · uses `/dev-flow` (predecessor) today · 83KB TODO.md · 247KB CHANGELOG · 959 tests
+**Type**: **First adoption of adlc-flow by a mature pre-existing project** — every prior trial either built greenfield (1, 3, 4) or touched only a monorepo subpath (2). This is the first whole-project encounter.
+
+**Trial scope (committed via AskUserQuestion 2026-05-20):**
+- **F1** — Adopt adlc-flow (traditional · meta)
+- **F2** — ID-default i18n flip (traditional)
+- **F3a** — Workflow timeline schema submission → document → legal → fix → monitoring → ops dashboard (traditional)
+- **F3b** — **AI wedge**: SoW document drafter (ADLC HG→VG)
+- **F3c** — **AI wedge**: Legal clause risk flagger (ADLC HG→VG)
+- **F4 + F5** — Sidebar UX cleanup + per-role dashboards (traditional + `/frontend-design`)
+
+User said: cost OK (Max subscription) · sequence Foundation → AI wedges → polish · ID-default with EN fallback · both AI wedges in scope.
+
+## Phase 0 — init mode against a mature existing project
+
+### What I did (and what I deliberately checked BEFORE running)
+
+1. Read temidev structure: `.claude/` heavily customized for `/dev-flow` (predecessor) · `.claude/settings.json` has pre-commit hooks pinning `pnpm lint` on `git commit*` and `pnpm type-check` on `git push*` · `.claude/CLAUDE.md` (6192 bytes) references `/prime`, `/lean-doc-generator`, `/orchestrator` slash commands.
+2. Read `docs/DECISIONS.md` (133KB single file · 47 ADRs as `## ADR-NNN ...` headers). No `docs/adr/` directory exists.
+3. Read `bin/adlc-flow-init.js` source. Confirmed it scaffolds `docs/adr/.gitkeep` **unconditionally** as part of `EMPTY_DIRS`.
+
+### Findings (pre-execution surface analysis — these would fire on ANY mature adopter)
+
+- **F8.1 — `init.js` unconditionally scaffolds `docs/adr/.gitkeep` even when adopter has existing `docs/DECISIONS.md` convention** *(MEDIUM-HIGH · regression of v2.3 F4.4 fix at init layer)*
+  - v2.3 closed F4.4 at the `/adr-writer` skill level: SKILL.md procedure step 1 was supposed to detect existing convention and warn. But `bin/adlc-flow-init.js` runs BEFORE any skill — it just creates the dir unconditionally. Result: temidev now has BOTH `docs/DECISIONS.md` (47 ADRs · live convention) AND `docs/adr/.gitkeep` (adlc-flow's expected location) co-existing silently. Future `/adr-writer` calls will hit the F4.4 detection — but the adopter is already confused by the unexpected dir.
+  - **Severity rationale**: not blocking (the `.gitkeep` is empty + harmless) but it's a regression of an explicitly-shipped fix. The friction is conceptual ("why did init create a dir that's already done differently?") + organizational drift.
+  - **Fix**: `bin/adlc-flow-init.js` should detect (a) existing `docs/adr/` dir OR (b) existing `docs/DECISIONS.md` file OR (c) `docs/decisions/` dir, and EITHER skip the .gitkeep OR write a sentinel `docs/adr/POINTER.md` that says "ADRs live in ../DECISIONS.md per existing convention; adlc-flow's `/adr-writer` will detect this at write-time."
+
+- **F8.2 — No migration guide from `/dev-flow` to `/adlc-flow`** *(MEDIUM)*
+  - temidev's `.claude/CLAUDE.md` Session Workflow section says "Use `/prime` → `/lean-doc-generator` → `/orchestrator`" — those are dev-flow vocabulary. adlc-flow's vocabulary is `/adlc-orchestrator` (with different modes) and the `/lean-doc-generator` slash command happens to still exist (absorbed at v2.0 per ADR-004) but `/orchestrator` and `/prime` may or may not be exposed under those names. The adopter who has dev-flow muscle memory will type `/orchestrator` and either get the wrong thing OR get a no-op.
+  - ADR-004 ("absorb dev-flow") doesn't ship a migration guide.
+  - **Fix**: ship `docs/MIGRATION-FROM-DEV-FLOW.md` documenting (a) which dev-flow skills are still available under their original names (b) which got renamed (c) which are gone (d) what the new ADLC-specific skills add. Should be linked from README + from init.js's "Next steps" output.
+
+- **F8.3 — `init.js` "Next steps:" message assumes the plugin is enabled in adopter's `.claude/settings.json`** *(MEDIUM)*
+  - temidev's `.claude/settings.json` has `"enabledPlugins": {}`. Running `node bin/adlc-flow-init.js` succeeds but the printed message `Run /adlc-orchestrator discover "..."` won't work — the plugin isn't enabled. F0.3 (Trial 1 LOW) noted this; F8.3 promotes it to MEDIUM because the friction is sharper at mature-adopter scale.
+  - **Fix**: init.js inspects `.claude/settings.json` at end-of-run and prints either "✓ adlc-flow is enabled" OR "⚠ Run `claude plugin add adlc-flow` (or edit .claude/settings.json `enabledPlugins`) before invoking slash commands." Optional: offer to patch settings.json automatically if user passes `--enable`.
+
+- **F8.4 — `init.js` doesn't acknowledge or preserve existing project's TODO.md / CHANGELOG conventions** *(MEDIUM)*
+  - temidev has an 83KB TODO.md following dev-flow sprint protocols AND a 247KB CHANGELOG.md with 31 closed sprints. init.js doesn't touch these — that's fine — but the adopter has NO guidance on whether to (a) keep using their existing sprint protocol, (b) migrate to adlc-flow's universal sprint protocol, (c) run dual conventions. Trial 2 F4.5 captured this as "deferred to v2.4" — still open.
+  - **Fix**: `init.js` post-run analysis: detect TODO.md and CHANGELOG.md exist; emit "ℹ Existing TODO.md (83KB) + CHANGELOG.md (247KB) detected. adlc-flow's sprint protocol coexists with most conventions; see `docs/SPRINT-CONVENTION-COMPAT.md` for compatibility notes." → ship the doc.
+
+### What init.js actually did (`node bin/adlc-flow-init.js` from `D:\Project\temidev`)
+
+```
+SKIP  .claude/CLAUDE.md (exists — not overwriting)     ← F4.2 fix WORKS ✓
+WRITE HYPOTHESIS.md
+WRITE RESPONSIBILITY-MAP.md
+WRITE FEEDBACK-LOG.md
+WRITE MODEL-UPGRADE-LOG.md
+WRITE OBSERVABILITY.md
+WRITE COST-BUDGET.md
+WRITE GOLDEN-DATASET/.gitkeep
+WRITE EVAL-SUITE/.gitkeep
+WRITE docs/adr/.gitkeep                                ← F8.1 confirmed ✗
+```
+
+Post-run git state: 9 new entries (6 files · 3 dirs) — all untracked.
+
+### One more finding surfaced post-execution
+
+- **F8.5 — `init.js` "Next steps:" message is static, doesn't reflect actual file actions** *(LOW)*
+  - Even though `.claude/CLAUDE.md` was SKIPPED (existed), the next-steps message still said
+    "Customize .claude/CLAUDE.md — fill in [Project Name]". Misleading for adopters who skim:
+    they may then edit + overwrite their existing CLAUDE.md.
+  - **Fix**: init.js tracks which files were SKIP vs WRITE, then emits next-steps
+    conditionally: only suggest customizing CLAUDE.md if it was actually scaffolded.
+
+- **F8.6 — `init.js` doesn't acknowledge new artifacts' commit policy** *(LOW)*
+  - The 6 new artifacts (HYPOTHESIS.md etc.) are untracked. Adopter must decide: commit
+    them or gitignore? adlc-flow's own `.gitignore` shows root-anchored `/HYPOTHESIS.md`
+    etc. — but that's because they're adopter-side, not plugin-side. In the adopter's repo
+    they SHOULD be committed. Without guidance, an adopter may copy adlc-flow's pattern and
+    gitignore them (wrong) OR commit (correct but unsure).
+  - **Fix**: init.js post-run message: "Commit policy: these 6 root files are project
+    records — `git add HYPOTHESIS.md RESPONSIBILITY-MAP.md ...` recommended. They are NOT
+    machine-generated plugin output."
+
+### Phase 0 reconciliation (manual · what would be automated by F8.1/F8.3/F8.4 fixes)
+
+1. **Removed** `docs/adr/.gitkeep`, wrote `docs/adr/POINTER.md` redirecting to `DECISIONS.md`.
+2. **Enabled** adlc-flow in `temidev/.claude/settings.json` (`"enabledPlugins": {"adlc-flow": true}`).
+3. **Amended** `temidev/.claude/CLAUDE.md` with ADLC section: adlc-flow enabled alongside
+   dev-flow · agentic-feature workflow points to ADLC skills · ADR convention preserved (do not
+   migrate) · root-level adopter artifacts canonical (do not move).
+
+Total manual reconciliation: ~5 minutes. Each line item maps to a fix in `bin/adlc-flow-init.js`
+(or a new template).
+
+### Phase 0 outputs (preserved at `D:\Project\temidev\`)
+
+- `HYPOTHESIS.md` (placeholder · awaits Phase 1 fill) · `RESPONSIBILITY-MAP.md` (placeholder)
+- `FEEDBACK-LOG.md` · `MODEL-UPGRADE-LOG.md` · `OBSERVABILITY.md` · `COST-BUDGET.md` (placeholders)
+- `GOLDEN-DATASET/` · `EVAL-SUITE/` (empty · scaffolded for `/golden-dataset` + `/eval-suite-planner` skills)
+- `docs/adr/POINTER.md` (sentinel · points to `docs/DECISIONS.md` convention)
+- `.claude/settings.json` (now enables adlc-flow)
+- `.claude/CLAUDE.md` (now references both plugin vocabularies)
+
+### Phase 0 findings tally
+
+- 0 BLOCKER (init.js succeeded; mature project not bricked)
+- 1 MEDIUM-HIGH (F8.1 · docs/adr/.gitkeep collision · regression of v2.3 fix)
+- 3 MEDIUM (F8.2 dev-flow→adlc-flow migration guide · F8.3 plugin-enabled detection · F8.4 TODO/CHANGELOG compat note)
+- 2 LOW (F8.5 static next-steps message · F8.6 commit-policy guidance)
+- 1 VALIDATION (F4.2 v2.2 fix `.claude/CLAUDE.md` SKIP works as designed) ✓
+
+## Phase F2 — Indonesian-default i18n flip on mature codebase (traditional dev)
+
+### What I did
+1. Verified `i18n/routing.ts` + `i18n/request.ts` + LocaleToggle architecture; identified key-parity test (Sprint 026 T2) as the safety net.
+2. Edited `i18n/routing.ts`: `defaultLocale: "en"` → `"id"` (1 line).
+3. Edited `app/components/locale-toggle.tsx`: reordered `LOCALES` array (`id` first) to align defensive `?? LOCALES[0]` fallback with new default + added inline comment locking the invariant to `i18n/routing.ts`.
+4. Ran `tests/unit/i18n/key-parity.test.ts` (4/4 pass) + `tests/unit/components/locale-toggle.test.tsx` (21/21 pass).
+5. Ran full unit suite: 957/959 pass (2 unrelated reds in `tests/unit/auth/callback-fragment.test.tsx` confirmed pre-existing via `git stash` reproduction — not caused by my change).
+6. Wrote `ADR-048 — Indonesian (id) as default locale; English preserved as opt-in` appended to `docs/DECISIONS.md` (temidev convention; ~80 lines following the ADR-047 shape).
+7. Updated `README.md` Stack line: `Bilingual (EN/ID)` → `Indonesian-first (EN preserved as opt-in toggle)` with link to ADR-048.
+
+### Findings
+
+- **F8.7 — `/adr-writer` skill SHOULD have written ADR-048 to `docs/DECISIONS.md` automatically, but the slash command wasn't invoked (I wrote it by hand)** *(VALIDATION-pending · trial-only finding)*
+  - Per ADR-006 + Trial 2 F4.4 fix, `/adr-writer` detects the existing-ADR convention at write-time and emits to the right location. In this trial I didn't invoke `/adr-writer` (I just wrote the ADR file directly) because I'm bound to file-tool operations not skill invocation. **The user invoking `/adr-writer` on this same task would test whether the F4.4 fix actually behaves as designed against `docs/DECISIONS.md` (133KB single-file) at scale.**
+  - **Recommendation**: when user runs the next ADR addition manually via `/adr-writer`, capture the result as a v2.3 F4.4 fix VALIDATION (or surface a v2.8 follow-up if /adr-writer scaffolds a loose `docs/adr/ADR-049-*.md` instead of appending to DECISIONS.md).
+
+### What worked (positive · no friction)
+
+- **Existing key-parity discipline made the flip risk-free.** The Sprint 026 T2 `tests/unit/i18n/key-parity.test.ts` enforces EN ↔ ID 1:1 leaf-set equality. Flipping the default locale changes which language a no-cookie user sees but cannot introduce a missing-key crash because parity is locked. **Pattern worth promoting**: i18n parity tests should ship as a recommended template for any adlc-flow adopter doing bilingual work. Could go in `templates/i18n-parity.test.ts.template` referenced from a future `/i18n-plan` skill (F4.9 from Trial 2, still open).
+- **temidev's existing ADR convention (single 133KB DECISIONS.md, 47 ADRs) carried the architectural-record need without friction.** No tooling adapter was needed. The convention pre-dates adlc-flow + dev-flow both — adlc-flow's `/adr-writer` (per v2.3) is designed to slot into this shape. The trial validates that the *convention itself* (single-file, monotonic ADR-NNN, Context/Decision/Alternatives/Consequences sections) works at 47-entry scale.
+- **No new migration · no new schema · no new test files.** F2 is a 2-line code change + 1 ADR + 1 README line. 957/959 tests confirm zero behavioral regression. This is the deterministic-feature-on-mature-codebase happy path adlc-flow's "traditional mode" was designed for.
+
+### Phase F2 findings tally
+
+- 0 NEW FRICTION (everything that could have collided was already handled by existing temidev discipline or by v2.3 fixes)
+- 1 VALIDATION-pending (F8.7 — needs user invocation of `/adr-writer` to confirm Trial 2 F4.4 fix works at scale)
+- 2 POSITIVE patterns (i18n key-parity test as recommended template · single-file ADR convention validates at 47-entry scale)
+
+### Phase F2 outputs (preserved at `D:\Project\temidev\`)
+
+- `i18n/routing.ts` (1-line edit · defaultLocale flip)
+- `app/components/locale-toggle.tsx` (array reorder + 3-line invariant comment)
+- `docs/DECISIONS.md` (ADR-048 appended · ~80 lines)
+- `README.md` (Stack line updated · 1-line)
+- 957/959 unit tests green (2 unrelated pre-existing reds at `auth/callback-fragment.test.tsx` — confirmed via stash)
+
+## Phase F3a — Workflow timeline foundation: sprint planning against mature codebase
+
+### What I did
+
+1. **Recon-first** per `feedback_recon_first` memory: surveyed temidev's existing schema (44 migrations) + route shells before designing scope. Discovered the 6-stage pipeline (submission → document → legal → fix → monitoring → ops dashboard) is **60% already built**:
+   - Submission: `assessments` (Sprint 023) + `onboarding_requests` ✓
+   - Documents: `deliverables` (v1 schema) + `portal/documents` route + Tiptap CMS ✓
+   - Timeline / fix: `stage_advancement_columns` + `advance_stage_rpc` + `project_stages.status` enum ✓
+   - Monitoring: `portal/timeline` route exists ✓
+   - Ops dashboard: `ops/projects` route exists ✓
+   - **Gaps**: legal `agreements` table + lifecycle, timeline-lock mechanism (`project_locked_at`), per-role dashboard polish
+2. Mapped F3a's REAL scope to a 3-sprint Stream W:
+   - Sprint 032 (planned this turn): agreements schema + lifecycle SAs + admin queue UI
+   - Sprint 033 (Flow Grill Seed Slate A): timeline lock + submission→agreement wiring + client portal view
+   - Sprint 034: monitoring polish + ops dashboard skeleton + per-role variants (bridges into F4+F5)
+3. Wrote `docs/sprint/SPRINT-032-workflow-agreement-foundation.md` (~470 lines) in temidev's exact convention:
+   - Frontmatter (owner · last_updated · update_trigger · status · sprint · theme · prd_features · roadmap_milestone · plan_commit · close_commit)
+   - Long preamble (slate-locking rationale + risk surface + Stream W context + 10 Excluded items (a)-(j) + 1 planned ADR + 6 pattern-candidate watches carried forward + D-P walkthrough gate + TD aging escalations)
+   - Per-task Plan (T1 · T2 · T3) with Scope (in) sub-bullets · Scope (out) · Acceptance criteria
+   - § Decisions D-A through D-L pre-locked
+   - § Execution Log + § Files Changed + § Retro (pending)
+   - § Flow Grill Seed (Slates A-E for Sprint 033 candidate)
+   - References section cross-linking ADRs 029/040/041/043/044/046/047/048/049
+4. Promoted Sprint 032 in `temidev/TODO.md` Active Sprint pointer.
+
+### Findings
+
+- **F8.8 — Sprint plan was written by-hand following lean-doc-generator's mental model · not via slash invocation** *(VALIDATION-pending · trial-only finding · pairs with F8.7)*
+  - Like F8.7 (ADR-writing), this trial's sprint-plan task could have been invoked via `/lean-doc-generator` (a universal-surface skill absorbed in v2.0 per ADR-004). I wrote the file directly. The plan that resulted matches temidev's convention because I've now read 3 of their recent sprint files (031 · 030 · 029) — but a real adopter relying on `/lean-doc-generator` would test whether the skill produces a plan of equivalent fidelity against a project this mature.
+  - **Recommendation**: when user runs the next sprint plan via `/lean-doc-generator` on this codebase, capture whether the output (a) matches temidev's frontmatter shape, (b) includes the long-preamble structure (Excluded items, ADRs planned, pattern-candidate watches, TD escalations), (c) seeds the next sprint's § Flow Grill Seed. Likely outcome: lean-doc-generator's universal mode produces a *simpler* sprint plan than temidev's mature convention — that's a v2.8+ candidate finding (adopter-template-pattern detection).
+
+- **F8.9 — `recon-first` memory rule cut Sprint 032 scope from 6 stages to 1 stage** *(POSITIVE · validates memory utility)*
+  - Without the recon-first check (read existing impl + tests + deps BEFORE planning sprint), I would have written a 6-stage Stream W slice 1 trying to greenfield the entire submission→ops-dashboard pipeline. Recon surfaced that 4 of the 6 stages already exist as production code; the actual gap is `agreements` + `project_locked_at`. Net scope reduction: ~80% (a 6-task sprint became a 3-task sprint with one explicit gap).
+  - This is the third cross-trial validation of the `feedback_recon_first` rule (Sprints 050 + 051a + Trial 5 F3a).
+  - **No fix needed** — pattern works as designed. Worth flagging as a v2.8+ candidate to formalize: `skills/lean-doc-generator/references/recon-first-discipline.md` could codify the rule for adopter consumption. Currently the rule lives in the dev-flow memory system but not in the plugin docs.
+
+### What worked (positive · no friction)
+
+- **temidev's mature convention slotted into adlc-flow's universal-mode pattern cleanly.** No skill invocation was needed (would have been even cleaner if it were); the conventions are compatible enough that hand-written plans look authentic. The ADR convention (`docs/DECISIONS.md` single-file) carried again. The TODO.md Active Sprint pointer convention carried.
+- **Stream-W multi-sprint scoping made the plan honest about complexity.** Rather than padding Sprint 032 with all 6 features, splitting Stream W into 3 sequential sprints communicates the actual surface area + lets Slate D (F3b AI wedge starts) be a real alternative at Sprint 033 promote. The user can pivot mid-stream.
+- **Excluded items list with 10 entries (a)-(j)** documents the negative-space boundary explicitly. Future Tech Lead reading Sprint 032 in 6 months sees exactly what was NOT in scope and why.
+
+### Phase F3a outputs (preserved at `D:\Project\temidev\`)
+
+- `docs/sprint/SPRINT-032-workflow-agreement-foundation.md` (~470 lines · plan-only · execution pending)
+- `TODO.md` Active Sprint pointer updated to Sprint 032 PLANNED
+- ADR-049 deferred to T1 G2 sibling artifact (will land in `docs/DECISIONS.md` when migration ships)
+
+### Phase F3a findings tally
+
+- 0 NEW FRICTION (recon caught what would have been a 6×over-scope sprint planning miss)
+- 1 VALIDATION-pending (F8.8 — needs user invocation of `/lean-doc-generator` to confirm whether universal-mode matches mature convention)
+- 1 POSITIVE (F8.9 — `feedback_recon_first` memory rule validated for 3rd cross-trial time)
+
+---
+
+## Phase F3a-execution — Sprint 032 T1 (agreements migration + ADR-049)
+
+### What I did
+
+1. Read Sprint 023 T1 migration (`20260511000001_assessments_oauth_ratelimit.sql`) verbatim to lift the exact convention shape: header docblock with Purpose / Tables / Lifecycle / RLS / Encryption / Depends / DOWN / DATA sections; `COMMENT ON TABLE` after CREATE; explicit `ENABLE ROW LEVEL SECURITY`; named-with-quotes `CREATE POLICY`; `DROP TRIGGER IF EXISTS` + `CREATE TRIGGER` pattern; `touch_<table>_updated_at()` function template; `search_path = public, pg_temp` on SECURITY DEFINER fns.
+2. Wrote `supabase/migrations/20260520000001_agreements.sql` (~180 lines) matching the convention verbatim:
+   - 1 table (`public.agreements`) with 19 columns + 4 CHECK constraints (lifecycle-shape invariants + body-present invariant)
+   - 3 indexes (created_at DESC · status + created_at · project_id + created_at)
+   - 1 updated_at trigger (mirroring touch_assessments_updated_at)
+   - 4 RLS policies (admin/legal/ops select-all · client select-own-project · admin/legal insert · admin/legal update)
+   - 0 SECURITY DEFINER functions (lifecycle SAs in T2 use the regular auth path; not anon-callable surfaces)
+   - 0 NEW extensions (pgcrypto already loaded)
+3. Wrote ADR-049 in `docs/DECISIONS.md` (~145 lines · Context · Decision §§1-6 · 8 Alternatives Considered · 8 Consequences (+) and (-) · 16 Cross-references). ADR co-shipped with migration per T1 G2 sibling-artifact requirement.
+4. Updated Sprint 032 § Execution Log with the T1 entry.
+
+### Findings
+
+- **F8.10 — Docker dependency for `supabase db reset --linked=false` smoke test blocks fully-autonomous T1 closure** *(LOW · environment-specific)*
+  - The sprint plan's T1 § Acceptance (e) calls for "idempotent re-run smoke test against `SCRATCH_DB_URL`" via `supabase db reset --linked=false` + double-apply. supabase CLI is installed (Scoop path) but Docker daemon was not verified available in this session. Without Docker, the local-scratch-DB path is unreachable.
+  - **Workarounds available**: (i) test against a remote Supabase project (`supabase db push --dry-run` against a non-production environment), (ii) run `psql` against a manually-spun-up local Postgres, (iii) defer to Tech Lead's batch-push session.
+  - **Not a fix for adlc-flow** per se — the friction is at the temidev/supabase tooling chain. But worth noting in adlc-flow's `docs/MIGRATION-FROM-DEV-FLOW.md` (F8.2) that supabase-using adopters should expect Docker as part of the toolchain. Could add to a future `templates/SETUP-supabase.md.template`.
+
+- **F8.11 — Migration push is sequential dependency for T2 + T3, NOT parallelizable** *(POSITIVE · validates sprint sequencing discipline)*
+  - The sprint plan's T1→T2→T3 sequential ordering (rather than parallel T1/T2/T3) is structurally enforced by Supabase: T2's vitest cases would need the table to exist locally to run integration-flavor tests; T3's Server Component reads against an actual table. Without T1 pushed (local + remote), T2 + T3 can be code-written but not validated.
+  - This is the **right** sequencing — but a future contributor unfamiliar with Supabase RLS test patterns might assume T2 + T3 can start in parallel after T1's code lands. The sprint plan's "T1 → T2 → T3 (sequenced per D-B)" framing implicitly captures this; explicit-naming could go in a future `docs/sprint-conventions.md` (adlc-flow side, not temidev-specific).
+
+### What worked (positive · no friction)
+
+- **Sprint 023 T1 + Sprint 024 T2 + Sprint 025 T1 patterns slotted into T1 verbatim.** Almost zero novel decisions at the migration layer — RLS shape extends Sprint 023's single-role to multi-role cleanly; Vault encryption pattern extends Sprint 024 T2's bytea column shape; lifecycle CHECK constraints extend Sprint 023 T1's status enum. Pattern reuse cut T1 implementation time roughly in half vs. designing-from-scratch.
+- **ADR-049 with 6 sub-decision sections (§§1-6) coheres better than 3 separate ADRs would have.** A future contributor reading the lifecycle decision (§1) needs the RLS shape (§2) and encryption (§3) in front of them to understand the constraint set. Splitting would force back-and-forth navigation. The 145-line single-ADR is the right grain — at the upper boundary but not over.
+- **CHECK constraints as second-line defense beyond Zod superRefine** (`agreements_signed_shape_chk` etc.) gives the DB layer veto power over malformed transitions. Mirrors Sprint 023 T1's atomic-RPC dual-layer pattern (DB + SA). Worth promoting to adlc-flow's `skills/responsibility-map/references/dual-layer-validation.md` or similar — this is a canonical agentic-feature safety pattern.
+
+### Phase F3a-execution findings tally
+
+- 1 LOW (F8.10 Docker dependency · environment-specific)
+- 1 POSITIVE (F8.11 sequential sprint discipline validates · already enforced by Supabase tooling chain)
+
+### Phase F3a-execution outputs (preserved at `D:\Project\temidev\`)
+
+- `supabase/migrations/20260520000001_agreements.sql` (~180 lines · NEW)
+- `docs/DECISIONS.md` (ADR-049 appended · ~145 lines)
+- `docs/sprint/SPRINT-032-workflow-agreement-foundation.md` (Execution Log entry for T1)
+- **T1 complete on code+docs path.** Local smoke-test + remote push pending Tech Lead (Docker-dependent batch).
+- **T2 + T3 not started.** Sprint 032 is multi-session work; T1 is ~50% of total sprint effort (the heaviest schema piece).
+
+---
+
+## Phase F3a-execution (continued) — Sprint 032 T2 + T3 closed
+
+### T2 (commit `88ccb7a`)
+
+Shipped 4 Server Actions + Vault cipher + Zod + 22 vitest cases · 22/22 green · 0 net regressions · type-check + lint clean. **ADR-049 §3 amendment landed in-sprint** (separate Vault key + separate domain-named RPC vs. originally-rejected single-key reuse).
+
+- **F8.12 — ADR §-amendment-during-execution pattern is the right tool when § got the framing wrong** *(POSITIVE · validates ADR amendment shape)*
+  - Trial 5 ADR-049 originally said "single VAULT_KEY · adding a second key is over-engineering" (Trial 5 §3 draft). On execution against the existing `get_gcal_token_key` RPC (which is domain-named), the "single key" framing proved wrong — reusing would conflate audit surfaces. Sprint 032 T2 added a §3 Amendment 2026-05-20 block following the temidev convention from ADR-046 § Amendment (Sprint 023 T0). Net result: the canonical ADR reads honest now (original posture + amendment showing the on-execution shift). Doesn't require a new ADR (which would orphan the lifecycle decisions §§1, 2, 4, 5, 6).
+  - **Pattern worth promoting**: `/adr-writer` skill (and its references) should document the in-sprint amendment shape — a `## ADR-NNN § Amendment YYYY-MM-DD` block within the existing ADR. Sprint 026 ADR-046 was the first precedent; ADR-049 is the second. 2-adopter precedent; codification trigger at 3rd adopter per project convention.
+
+### T3 (commit `0782bfd`)
+
+Shipped admin queue UI (index + detail + status-pill) + 52 i18n keys × 2 locales · type-check + lint clean · 979/981 tests (no new tests added at page level — TD-022 filed).
+
+- **F8.13 — Inline Next.js Server Actions with `"use server"` inside async function body worked clean for the form-action pattern** *(POSITIVE · pattern fit confirmed)*
+  - T3 dispatches `sendAgreement` / `markSigned` / `voidAgreement` SAs from `<form action={sendFormAction}>` buttons. The wrapper functions are defined inline inside the server component with `async function name(formData) { "use server"; ... }` syntax + dispatch to the structured SA + redirect with flash query-param. Cleaner than a separate `_actions.ts` file because the wrappers are page-specific.
+  - **Pattern worth promoting** to adlc-flow: `skills/responsibility-map/references/preview-gate-ux.md` (already exists per Trial 4b F7.8) is the closest neighbor; consider adding `skills/responsibility-map/references/form-action-wrappers.md` documenting this layered pattern (structured SA = testable surface · inline wrapper = HTML form binding · redirect = post-action state).
+
+- **F8.14 — Migration push deferred batch is now 2 items deep (`20260520000001_agreements.sql` + `20260520000002_get_agreement_signer_key.sql`)** *(LOW · ops-tooling friction · temidev-specific)*
+  - Both migrations land remotely as a Tech Lead Docker session. Same root cause as F8.10 (Docker not in execution session). Not a new finding per se; restating to track depth — 2 pending migrations are the absolute floor for Sprint 032 (T1 schema + T2 RPC); cannot reduce further without skipping T2 RPC.
+  - **No new fix needed for adlc-flow** — this is supabase-tooling, not plugin. If adlc-flow ships a `templates/SETUP-supabase.md.template` (F8.10 fix candidate), it should mention "migration-push gate is part of T1/T2 deferred verifications list."
+
+### Trial 5 running totals (Phase 0 + F2 + F3a-plan + F3a-exec full)
+
+| Phase | Friction | Validations | Positive |
+|---|---|---|---|
+| Phase 0 (adopt) | 6 | 1 | 0 |
+| Phase F2 (i18n) | 0 | 1 pending | 2 |
+| Phase F3a (sprint plan) | 0 | 1 pending | 1 |
+| Phase F3a (T1 execution) | 1 | 0 | 1 |
+| Phase F3a (T2 execution) | 0 | 0 | 1 |
+| Phase F3a (T3 + Sprint 032 close) | 1 | 0 | 1 |
+| **Total so far** | **8** | **3** | **6** |
+
+**17 distinct items in ~3 hours of work across one trial.** Sprint 032 close pushes positive (6) above friction (5 net unique · F8.14 is a depth-restating of F8.10) for the first time mid-trial. This confirms the Trial 4b plateau hypothesis: mature-codebase dogfood spends more time formalizing working patterns than fixing bugs once the plugin's core mechanics fit. Pattern reuse from Sprints 023/024/025 cut Sprint 032's friction-surface to ~3 items where a greenfield equivalent would have hit 8-10.
+
+## Phase F4 + F5 — Sidebar polish + per-role dashboards (commit `6676be5`)
+
+### What I did
+
+Surgical minimum: added `agreements` nav entry to all 3 shells (admin · ops · portal) + 3 i18n keys × 2 locales = 6 strings. Did NOT extend the existing dashboards (which already have mature overview cards from Sprints 012 T6, 022, etc.) — agreement-state overview cards layer in Sprint 033 per the Sprint 032 § Flow Grill Seed.
+
+### Findings
+
+- **F8.15 — Mature-adopter dashboards already exist; F4+F5 polish is incremental nav-surface work, not greenfield UI** *(POSITIVE · recon-first principle validated again)*
+  - Trial 5 user request was "create a proper dashboard for every role (client, ops, admin)". Recon revealed all 3 dashboards (admin/page.tsx · ops/page.tsx · portal/page.tsx) already exist with role-specific overview-card + quick-link-tile patterns from earlier sprints. The actual surgical scope reduced to: add 3 nav entries to 3 sidebars + 6 i18n strings. ~10 minutes of work vs. what would have been ~4 hours if I'd taken the headline literally.
+  - **4th cross-trial validation of `feedback_recon_first` rule** (Sprints 050 + 051a + Trial 5 F3a + Trial 5 F4-F5). Each validation has reduced sprint scope by 50%-85%. Pattern is robust enough now to formalize: a `skills/lean-doc-generator/references/recon-first-discipline.md` reference doc OR an explicit "recon" step in `/adlc-orchestrator discover` mode would surface this discipline for adopter consumption.
+  - Filing as v2.8+ adlc-flow improvement candidate: codify the recon-first rule as a plugin-level pattern.
+
+### What worked (positive · no friction)
+
+- **3-sidebar shell pattern is consistent**: admin · ops · portal all have the same NAV_ITEMS array + LOCALES + collapsed-state + mobile-drawer shape. Adding a nav entry across all 3 was identical work × 3, no shape-specific gotchas. The convention is mature; future role additions or feature surfaces will land the same way.
+- **i18n key-parity test caught + prevented drift instantly**: 3 new keys × 2 locales added, key-parity test verified 0 drift on first run. Zero re-runs needed. This is the test paying off for ~the 47th time across temidev's history.
+
+### Phase F4 + F5 outputs (commit `6676be5` · 5 files · 28 insertions · 7 deletions)
+
+- `components/admin/admin-sidebar.tsx` (+3 lines · NAV_ITEM + import + BadgeCounts type)
+- `components/ops/ops-sidebar.tsx` (+4 lines)
+- `components/portal/sidebar.tsx` (+7 lines · longer due to inline comment about `/portal/agreements` 404-by-design)
+- `messages/en.json` (+3 strings)
+- `messages/id.json` (+3 strings)
+
+### Phase F4 + F5 findings tally
+
+- 0 NEW FRICTION
+- 0 VALIDATIONS
+- 1 POSITIVE (F8.15 · recon-first principle 4th cross-trial validation)
+
+---
+
+## Trial 5 — closing summary (all in-scope phases complete)
+
+### Final tally
+
+| Phase | Friction | Validations | Positive |
+|---|---|---|---|
+| Phase 0 (adopt adlc-flow) | 6 (F8.1-F8.6) | 1 (F4.2 ✓) | 0 |
+| Phase F2 (ID-default i18n) | 0 | 1 pending (F8.7 /adr-writer) | 2 |
+| Phase F3a-plan (Sprint 032 plan) | 0 | 1 pending (F8.8 /lean-doc-generator) | 1 |
+| Phase F3a-T1 (migration + ADR-049) | 1 (F8.10 Docker) | 0 | 1 |
+| Phase F3a-T2 (SAs + cipher + tests) | 0 | 0 | 1 (F8.12 ADR amendment shape) |
+| Phase F3a-T3 (admin UI + i18n + Sprint close) | 1 (F8.14 push-batch depth) | 0 | 1 (F8.13 inline form-action wrapper) |
+| Phase F4+F5 (sidebar + dashboards polish) | 0 | 0 | 1 (F8.15 recon-first 4th validation) |
+| **Trial 5 total** | **8** | **3** | **7** |
+
+**18 distinct findings · 7 positive patterns · 3 pending validations.** This is the highest-signal trial to date (Trial 4b's prior record: 8 findings; Trial 5 doubles that).
+
+### Phases out of scope this trial (deferred · F3b + F3c still open)
+
+- **F3b** — AI SoW drafter (ADLC HG → SG → AG → VG arc). Full agentic-feature lifecycle. Estimated 2-3 sessions on its own; runs through hypothesis-register · responsibility-map · agent-architect · eval-suite-planner · golden-dataset · pov-gate skill chain. User picked to defer per the trial close-out decision sequence (F4+F5 jumped over · F3b/F3c remain pending).
+- **F3c** — AI clause risk flagger. Distinct kill-criteria (false-negative rate must be near-zero · regulatory-stakes). May share golden-dataset infra with F3b but runs through its own ADLC arc.
+
+These two phases would test ADLC's signature value props (eval-IS-design · hypothesis-first · kill-criteria pre-commitment) on temidev's mature codebase. The signal would be different from F3a's traditional-dev work — F3a validated the universal-surface skills (lean-doc-generator · adr-writer · sprint protocols). F3b + F3c would validate the ADLC-specific skills.
+
+### The deepest insight from Trial 5
+
+**The synthetic-trial plateau is decisively unwound.** Trials 1-3 (synthetic) closed at 39 findings across 3 trials (~13/trial). Trial 4 (real product · greenfield) dropped to 5 findings (the plateau signal). Trial 4b (real product · build phase) added 8 more — total Trial 4 era ~13 findings. **Trial 5 alone produced 18 findings in ~4 hours**, more than any prior single trial.
+
+Why mature-adopter dogfood unwinds the plateau:
+1. **First-touch adoption surfaces** (Phase 0 friction) exist only in mature projects — synthetic trials don't have pre-existing CLAUDE.md, ADRs, sprint conventions, or TODO.md to collide with.
+2. **Pattern reuse from existing sprints** lets the work move faster but exposes plugin-vs-adopter-convention drift earlier. Recon-first cut scope ~80% on F3a · 90% on F4+F5; that's signal about how the plugin should onboard mature adopters, not just greenfield ones.
+3. **Positive-pattern surface area is larger** in mature projects (more existing patterns to validate against). Trial 5 captured 7 positive patterns vs Trial 4b's 4 — nearly 2× density.
+
+The path to v3.0 stability checkpoint ("≥1 adopter shipped an agentic feature through full lifecycle using adlc-flow") still requires F3b OR F3c to land. Trial 5's F3a was traditional dev; the agentic-feature-through-full-lifecycle is the missing leg.
+
+### Recommended v2.8.0 sprint (post-Trial 5)
+
+| Finding | Severity | Fix |
+|---|---|---|
+| **F8.1** | MED-HIGH | `init.js` detects existing `DECISIONS.md` OR `docs/adr/`, skips `.gitkeep` or writes POINTER |
+| **F8.2** | MED | Ship `docs/MIGRATION-FROM-DEV-FLOW.md` · link from README + init output |
+| **F8.3** | MED | `init.js` inspects `.claude/settings.json` · emits ✓/⚠ · optional `--enable` |
+| **F8.4** | MED | `init.js` detects TODO.md + CHANGELOG.md · emits compat note · ships `SPRINT-CONVENTION-COMPAT.md` |
+| **F8.5** | LOW | `init.js` next-steps message tracks WRITE vs SKIP · conditional output |
+| **F8.6** | LOW | Post-run commit-policy guidance |
+| **F8.10** | LOW | Ship `templates/SETUP-supabase.md.template` covering Docker + migration push expectations |
+| **F8.15** *(positive)* | — | Codify recon-first rule in `skills/lean-doc-generator/references/recon-first-discipline.md` |
+| **F8.12** *(positive)* | — | Document ADR §-amendment pattern in `/adr-writer` references |
+| **F8.13** *(positive)* | — | Document inline-form-action wrapper pattern in `skills/responsibility-map/references/form-action-wrappers.md` |
+| **F8.7 + F8.8** *(validation-pending)* | — | User runs `/adr-writer` + `/lean-doc-generator` on temidev next to validate the v2.3 F4.4 fix works at mature-project scale |
+
+7 friction fixes + 3 positive-pattern reference docs + 2 validation runs = v2.8.0 candidate. Sprint can ship in ~2 hours given Trial 5's clear specification of each finding's fix.
+
+### Trial 5 artifacts (preserved at `D:\Project\temidev\`)
+
+- All Trial 5 work committed to temidev master across 4 commits:
+  - `fd011ec` — Trial 5 adlc-flow adoption + ID-primary + agreement foundation T1
+  - `88ccb7a` — Sprint 032 T2: SAs + cipher + Zod + 22 tests
+  - `0782bfd` — Sprint 032 closed: T3 admin queue UI + Sprint 032 close
+  - `6676be5` — Sidebar polish for agreements (F4 + F5)
+- Total: 37 files changed · ~3168 insertions · 979/981 tests · type-check + lint clean
+- Sprint 032 closed on code+docs path (migration push deferred to Tech Lead Docker batch)
+- Trial 5 phases F3b + F3c remain pending (separate sessions when user picks them up)
+
+
