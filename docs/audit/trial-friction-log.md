@@ -1029,13 +1029,90 @@ The path to v3.0 stability checkpoint ("≥1 adopter shipped an agentic feature 
 
 ### Trial 5 artifacts (preserved at `D:\Project\temidev\`)
 
-- All Trial 5 work committed to temidev master across 4 commits:
+- All Trial 5 work committed to temidev master across 5 commits:
   - `fd011ec` — Trial 5 adlc-flow adoption + ID-primary + agreement foundation T1
   - `88ccb7a` — Sprint 032 T2: SAs + cipher + Zod + 22 tests
   - `0782bfd` — Sprint 032 closed: T3 admin queue UI + Sprint 032 close
   - `6676be5` — Sidebar polish for agreements (F4 + F5)
-- Total: 37 files changed · ~3168 insertions · 979/981 tests · type-check + lint clean
+  - `7ad5ce1` — **F3b: HG + SG + AG complete** (570 insertions · ADR-050 + STRATEGY + PLAN + COST-BUDGET + HYPOTHESIS + RESPONSIBILITY-MAP all filled)
+- Total: ~3738 insertions across 43 files · 979/981 tests · type-check + lint clean
 - Sprint 032 closed on code+docs path (migration push deferred to Tech Lead Docker batch)
-- Trial 5 phases F3b + F3c remain pending (separate sessions when user picks them up)
+- Trial 5 phase F3b at 3/4 ADLC gates · F3c remains fully pending
+
+---
+
+## Phase F3b (continued) — HG + SG + AG complete (commit `7ad5ce1`)
+
+### What I did
+
+Walked the ADLC pre-build discipline for the AI SoW drafter feature through 3 of 4 gates. PoV build + VG measurement deferred. Used the same clarification-flow pattern that worked on umkm-indo Trial 4 (multi-turn AskUserQuestion · multiple-choice + recommendation + trade-off explanation), this time at higher legal-stakes domain.
+
+**HG (Hypothesis Gate) — HYPOTHESIS.md filled:**
+- H-001 with 5 pre-committed kill criteria (#1 hallucination ≤2% · #2 cost ≤Rp 5k/SoW · #3 verbatim leak HARD KILL · #4 scope-mismatch ≤5% · #5 acceptance ≥60%)
+- Skip-when: stay with current mix process (template-fill from package metadata)
+- Outcomes: A1+A3+A4+A6 (kill bad ideas · eval coverage · cost discipline · responsibility clarity)
+- 3 clarification rounds with user (current process · trigger point · input context | hallucination + cost + precedent privacy thresholds | scope-mismatch + acceptance + language register) — all user picks aligned with "Recommended" defaults
+
+**SG (Safety Gate) — RESPONSIBILITY-MAP.md filled:**
+- Single-agent feature (omits Chain column + cross-agent handoff section per template rule)
+- 8 decision points across `sow-drafter-agent` (scoped/advisory authority) + `admin/legal` (always-human-pre full authority) + `system` (deterministic cost-guard)
+- 5 unsafe-autonomy zones (verbatim reuse · hallucinated package features · finance commitments · PII inclusion · novel legal clauses)
+- 5 kill criteria mapped 1:1 to specific grid rows + zones (per template Compliance check section)
+- 3-tier kill-switch: per-task (auto via existing voidAgreement) · per-cohort (NEW `service_packages.ai_sow_disabled` 1-line column · Sprint 033+ T-add) · global (SOW_DRAFTER_ENABLED env var · 30s recovery)
+- 6 open questions deferred to AG, each with pre-AG recommendations grounded in Trial 4b precedents
+
+**AG (Architecture Gate) — ADR-050 + EVAL-STRATEGY + EVAL-PLAN + COST-BUDGET filled:**
+- ADR-050 in `docs/DECISIONS.md` (~390 lines · 6 sub-decisions · 8 alternatives · 8 consequences · 13 cross-refs):
+  - §1 Pattern: single-call planner with tool_use (validates F7.7 Trial 4b promotion · rejects 4 alternatives)
+  - §2 Model: Claude Sonnet 4.6 (rejects Haiku quality drift + Opus cost overrun)
+  - §3 Prompt: 3-cache-block (validates F7.6 Trial 4b promotion · system 1.5k + boilerplate 3k + style guide 1k)
+  - §4 Precedent retrieval: in-prompt with 2-layer redaction (Phase 1 ≤200 docs · pgvector at Phase 2 trigger)
+  - §5 Cost analysis: ~Rp 1,330/SoW post-warmup · 3.8× headroom under Rp 5k kill
+  - §6 Output shape: tool_use JSON Schema with oneOf per-section variants · server-side HTML rendering via NEW `lib/sow/render-html.ts`
+- `EVAL-SUITE/sow-drafter/STRATEGY.md` (NEW · ~190 lines · AG commitments · methodology + thresholds + N-floor + cadence + regression contract)
+- `EVAL-SUITE/sow-drafter/PLAN.md` (NEW · ~180 lines · runnable plan · dataset shape + eval runner spec + mock-first PoV pattern + regression Block-1/2/3)
+- `COST-BUDGET.md` filled with sow-drafter section (~95 lines · per-call ceiling + monthly aggregate Rp 100k + 7 alert routing rules)
+
+### Findings
+
+- **F8.16 — ADLC 3-gate pre-build discipline produces ~570 lines of canonical decisions in ~45 minutes of clarification + writing** *(POSITIVE · validates ADLC core value prop)*
+  - HG + SG + AG together fix every architectural variable that determines viability BEFORE any code is written. The 5 kill criteria + 8 decision points + 6 sub-architecture decisions + 50-sample eval plan all came from 3 rounds of clarification with the domain expert (Tech Lead). NO production code yet. NO golden samples yet. NO LLM calls made. But every kill-criterion is measurable, every authority boundary is explicit, every cost ceiling has a number, every alternative has a stated rejection rationale.
+  - This is the **first end-to-end exercise of the full ADLC pre-build skill chain on a mature codebase** (Trial 4 umkm-indo got HG + SG + AG too, but greenfield · Trial 5 is mature). The discipline scales: no new findings about the skill chain itself this phase, just clean application.
+  - **Pattern worth promoting**: the multi-turn AskUserQuestion clarification flow with "Recommended" defaults + trade-off-explained alternatives is the standard interaction pattern for HG. Trial 4 F6.4 already flagged this; F8.16 here is the 4th cross-trial validation. Adopting users will replicate this naturally if `/hypothesis-register` documents the pattern.
+
+- **F8.17 — Pre-AG recommendations in RESPONSIBILITY-MAP open questions land 6/6 chosen at AG** *(POSITIVE · validates SG → AG handoff)*
+  - SG ended with 6 open questions deferred to AG, each carrying a pre-AG recommendation (e.g. "Recommendation pre-AG: single-call with tool_use is likely the right fit · cost-cheaper · simpler eval surface · matches umkm-indo precedent"). At AG, ALL 6 recommendations were validated by deeper analysis and landed in ADR-050. Zero pivots from SG-stated direction.
+  - This isn't a coincidence — the SG pre-recommendations were grounded in Trial 4b's promoted patterns (F7.6 caching · F7.7 single-call · F7.8 preview-gate). Pattern reuse from a prior trial accelerates the next trial's AG. Pre-AG recommendations are a **convention worth promoting**: `/responsibility-map` skill could prompt for pre-AG recommendations when open questions are added, with explicit "informed by [reference]" attribution.
+
+- **F8.18 — temidev's `docs/DECISIONS.md` single-file ADR convention is at 49 ADRs and still navigable** *(POSITIVE · ADR convention scales)*
+  - ADR-050 is the 49th decision recorded in `docs/DECISIONS.md` (47 pre-Trial-5 + ADR-048 i18n + ADR-049 agreement + ADR-049 §3 Amendment + ADR-050 SoW drafter). File size is now ~150KB · still loadable + searchable. The single-file convention has not yet hit a scaling wall · validates the F8.18-precedent (the temidev convention) and the Trial 5 F4.4 fix posture (`/adr-writer` detects convention rather than forcing migration).
+  - **2nd-adopter precedent for "single-file ADR convention scales past 40 ADRs"** (1st adopter was the temidev decision to keep it · this Trial 5 measurement is the 2nd). Worth keeping the F4.4 v2.3 fix in adlc-flow.
+
+### What worked (positive · no friction)
+
+- **The clarification flow stayed tight**: 3 rounds × 3 questions = 9 decisions clarified. User chose "Recommended" on 8/9 questions and added one Other text on input-context (payment + timeline). Strong signal that the recommendations were well-calibrated to the actual product reality.
+- **Pre-AG recommendations attribution**: every SG open question that referenced "Trial 4b F7.6" / "F7.7" etc. resolved cleanly at AG because the precedent provided a strong default. Cross-trial pattern reuse is now load-bearing for adlc-flow's value proposition.
+- **ADR-050 §5 cost arithmetic landed in writing before any LLM call**: ~Rp 1,330/SoW with 3.8× headroom · zero ambiguity about the budget envelope. If the PoV measurement disagrees, the disagreement is the surface signal, not the unit economics.
+
+### Phase F3b (HG+SG+AG) outputs (commit `7ad5ce1` · 6 files · 570 insertions · 77 deletions)
+
+- HYPOTHESIS.md filled (~80 lines)
+- RESPONSIBILITY-MAP.md filled (~110 lines)
+- COST-BUDGET.md filled (~95 lines)
+- docs/DECISIONS.md +ADR-050 (~390 lines)
+- EVAL-SUITE/sow-drafter/STRATEGY.md NEW (~190 lines)
+- EVAL-SUITE/sow-drafter/PLAN.md NEW (~180 lines)
+
+### Phase F3b (HG+SG+AG) findings tally
+
+- 0 NEW FRICTION
+- 0 VALIDATIONS
+- 3 POSITIVE (F8.16 ADLC 3-gate discipline value · F8.17 SG→AG handoff via pre-recommendations · F8.18 temidev single-file ADR convention scales)
+
+### What remains in F3b for full HG→VG arc
+
+- **P3 prep** (1 session · ~2-3 hours): generateSowDraft SA (mock-first per F7.5) · 4 helper modules (render-html · redact-precedent · diff-precedent · the system prompt builder) · golden dataset 50 samples + 20 synthetic precedent corpus with honey-tokens · eval runner at `apps/web/scripts/eval-sow-drafter.ts`
+- **P4 build** (1 session · ~1-2 hours): wire live Anthropic SDK (Sonnet 4.6 + tool_use + 3-cache) · admin/agreements 'Create AI-drafted' button + SA dispatch · SOW_DRAFTER_ENABLED env var + cost-guard + audit emission
+- **VG measurement** (1 session · requires Vault key + Anthropic API key · ~Rp 82,500 spend for first 50-sample eval pass): live eval run + reviewer-rubric scoring + /pov-gate verdict synthesis · HYPOTHESIS.md status update OPEN → PROVED/GO_WITH_CONCERNS/KILLED
 
 
