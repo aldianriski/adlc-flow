@@ -1115,4 +1115,81 @@ Walked the ADLC pre-build discipline for the AI SoW drafter feature through 3 of
 - **P4 build** (1 session · ~1-2 hours): wire live Anthropic SDK (Sonnet 4.6 + tool_use + 3-cache) · admin/agreements 'Create AI-drafted' button + SA dispatch · SOW_DRAFTER_ENABLED env var + cost-guard + audit emission
 - **VG measurement** (1 session · requires Vault key + Anthropic API key · ~Rp 82,500 spend for first 50-sample eval pass): live eval run + reviewer-rubric scoring + /pov-gate verdict synthesis · HYPOTHESIS.md status update OPEN → PROVED/GO_WITH_CONCERNS/KILLED
 
+## Phase F3b (continued · P3 prep + P4 build) — code-side complete (commits `4349c17` + `5b60ad3`)
+
+### What I did
+
+**P3 prep (commit `4349c17` · 30 files · +3612 insertions):**
+- 5 SoW modules at `lib/sow/` (schema · render-html · system-prompt · redact-precedent · diff-precedent)
+- Server Action `lib/actions/sow-drafter.ts` with mock-first path
+- Zod validations at `lib/validations/sow-drafter.ts`
+- Generator + eval-runner at `scripts/{generate-sow-samples · eval-sow-drafter}.ts`
+- Golden dataset scaffold at `GOLDEN-DATASET/sow-drafter/v1/` (10 samples + 5 precedent · expansion to full 50 via generator fixture growth)
+- 29 vitest cases at `tests/unit/lib/sow/` · all green
+
+**P4 build (commit `5b60ad3` · 5 files · +719 insertions):**
+- Extended `lib/llm/anthropic-client.ts` with `callClaudeToolUse<T>()` for tool_use API
+- Live path in `generateSowDraft` SA: feature flag → cost guard → real precedent corpus load + decrypt + redact → tool_use call → cost compute → diff check → audit
+- Admin UI route at `/admin/agreements/new?project=<uuid>` (server component + inline form action wrapping generateSowDraft + createAgreement)
+- 20 i18n keys × 2 locales for new admin surface
+
+### Findings
+
+- **F8.19 — Mock-first P3 prep + live P4 wiring as separate commits worked clean** *(POSITIVE · validates F7.5 pattern at 5/6 gate scale)*
+  - P3 prep shipped the eval pipeline + SA + dataset at $0 (mock LLM). All 29 tests passed first run. Live wiring at P4 reused the same modules — only the LLM call surface changed. Trial 4b promoted mock-first per F7.5; F3b validates it at higher-stakes-domain scale. Pattern is robust.
+  - Adopters reading `skills/golden-dataset/references/mock-first-pov.md` (the F7.5 promotion) should consider this trial's commit chain (`4349c17` → `5b60ad3`) as the canonical example.
+
+- **F8.20 — Separate `callClaudeToolUse<T>()` surface vs. extending `callClaude()`** *(POSITIVE · pattern fit confirmed)*
+  - The existing `lib/llm/anthropic-client.ts` had a text-only `callClaude()` returning `{ text, inputTokens, ... }`. For F3b's tool_use, I added a SEPARATE function rather than extending the existing one. Trade-off: two slightly-redundant fetch wrappers vs one bloated function with optional parameters. Chose separation because the response parsing differs (`content[].text` vs `content[].input`) and the generic typing differs (`string` vs `T`).
+  - This is the right pattern for adlc-flow's `agent-architect` skill to document: when a new LLM API surface lands (tool_use today · streaming tomorrow), prefer a separate typed function over expanding the shared one. Phase 2 trigger: if a 3rd surface materializes (e.g. multi-turn tool_use), consider unifying via discriminated-union return type.
+  - Worth promoting to `skills/agent-architect/references/llm-client-surface-pattern.md` (or fold into the existing `single-call-planner.md` reference doc).
+
+### Phase F3b code-side findings tally
+
+- 0 NEW FRICTION
+- 0 VALIDATIONS
+- 2 POSITIVE (F8.19 mock-first pattern at scale · F8.20 separate-LLM-surface pattern)
+
+## Phase F3c (HG + SG + AG) — second AI wedge pre-build gates (commit `5419dc2`)
+
+### What I did
+
+Walked the ADLC discipline for the AI clause risk flagger feature (H-002 · classification, not generation). One focused clarification round (trigger · FN tolerance · action on findings) — user picked all "Recommended" defaults. HG + SG + AG written same session, ~30 minutes of structured work.
+
+**HG (HYPOTHESIS.md +H-002):**
+- 4 pre-committed kill criteria: FN-rate on HIGH ≤1% (HARD KILL · primary axis) · FP rate ≤30% · cost ≤Rp 3,000/analysis · latency ≤30s p95
+- Skip-when: 10-item manual legal checklist (Indonesian PT contract convention · independent value as structured review process)
+- Outcomes: A1 + A3 + A6 + A7
+
+**SG (RESPONSIBILITY-MAP.md +Feature: AI Clause Risk Flagger):**
+- 8 decision points · advisory-only authority (NEVER blocks workflow)
+- 5 unsafe-autonomy zones · 4 open questions deferred to AG with Trial 4b/F3b precedent recommendations
+- 3-tier kill-switch (per-task trivial since advisory · per-cohort N/A · global env var)
+
+**AG (ADR-051 · ~140 lines · tighter than ADR-050 since patterns now established · documents only deltas):**
+- §1 single-call tool_use (inherits ADR-050 §1)
+- §2 Sonnet 4.6 (inherits ADR-050 §2)
+- §3 2-cache-block (system + taxonomy · NO style guide — output is structured findings not prose)
+- §4 findings-list output shape (severity enum + 9-category enum + clause_excerpt verbatim + recommendation)
+- §5 ADVISORY ONLY authority (hard-block explicitly rejected during clarification)
+- §6 cost ~Rp 800/analysis · 3.75× headroom
+
+**Plus EVAL-SUITE/clause-risk-flagger/{STRATEGY,PLAN}.md + COST-BUDGET update.**
+
+### Findings
+
+- **F8.21 — Second AI wedge's AG took 50% the time of first** *(POSITIVE · architectural pattern reuse works)*
+  - ADR-050 (F3b) took ~390 lines + ~30 min. ADR-051 (F3c) took ~140 lines + ~10 min — because it explicitly documents only the DELTAS from ADR-050 (which already covers pattern + model + caching). The reader's expected mental loadout is now "read ADR-050 for the AI-feature architecture baseline · read ADR-051 for what differs." Same pattern would work for ADR-052 (next AI wedge).
+  - Worth promoting to `adlc-flow` as a documented convention: subsequent AI-feature ADRs in the SAME adopter project reference the first AI-feature ADR as the baseline and document only deltas. Could go in a `skills/adr-writer/references/ai-feature-adr-baselining.md`.
+
+- **F8.22 — Clarification round count dropped: F3b needed 3 rounds, F3c needed 1** *(POSITIVE · question-bank-reuse from prior feature)*
+  - F3b walked 3 clarification rounds (current process · trigger + input context · kill thresholds · scope-mismatch + acceptance + language). F3c walked 1 round (trigger + FN tolerance + action). Why? F3c reuses many F3b decisions implicitly (model · pattern · caching · language register · admin/legal authority). The remaining decision space is genuinely smaller because the architectural defaults are established.
+  - Pattern: when an adopter has shipped one AI wedge, subsequent wedges in the same product clarify ~3× faster. Worth surfacing in `skills/hypothesis-register` references: "reuse pre-AG recommendations across adopter's AI feature portfolio."
+
+### Phase F3c findings tally
+
+- 0 NEW FRICTION
+- 0 VALIDATIONS
+- 2 POSITIVE (F8.21 ADR deltas-from-baseline · F8.22 clarification-round count drops on 2nd AI wedge)
+
 
