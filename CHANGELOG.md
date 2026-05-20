@@ -4,6 +4,50 @@ All notable changes to `adlc-flow` are documented here. Format: [Keep a Changelo
 
 ---
 
+## [2.8.0] — 2026-05-20
+
+**Trial 5 (temidev mature-adopter dogfood) fixes + pattern promotion.** Closes 6 MEDIUM/LOW friction items surfaced during the first end-to-end ADLC walkthrough on a mature pre-existing codebase (temidev · 31 closed sprints · 49 ADRs in single-file convention · 83KB TODO.md · 247KB CHANGELOG). Promotes 3 positive patterns (ADR amendment shape · inline form-action wrappers · recon-first discipline). Full trial signal in [`docs/audit/trial-friction-log.md` § Trial 5](docs/audit/trial-friction-log.md). Trial produced 31 distinct items across 14 commits over 5 phases (Phase 0 adoption · F2 ID-default i18n · F3a workflow agreement · F3b SoW drafter ADLC arc 5/6 gates · F3c clause risk flagger ADLC arc 5/6 gates · F4+F5 sidebar polish).
+
+### Changed
+
+- **`bin/adlc-flow-init.js` v2.7.0 → v2.8.0** — five fixes for mature-adopter scenarios:
+  - **F8.1**: detects existing `docs/DECISIONS.md` (single-file ADR convention) or `docs/adr/` with content; writes `docs/adr/POINTER.md` (redirect sentinel) instead of `.gitkeep`. Prevents dual-convention silent collisions.
+  - **F8.3**: inspects `.claude/settings.json` post-run · emits ✓/⚠ status. New `--enable` flag patches `enabledPlugins.adlc-flow: true` automatically (creates settings.json if missing).
+  - **F8.4**: detects existing `TODO.md` + `CHANGELOG.md` + `docs/CHANGELOG.md` · emits compatibility note pointing to NEW `docs/SPRINT-CONVENTION-COMPAT.md` (this commit).
+  - **F8.5**: conditional next-steps message · only suggests customizing `.claude/CLAUDE.md` if it was actually WRITTEN (not SKIPPED).
+  - **F8.6**: post-run "commit policy" guidance · explicit `git add` example listing the 6 root adopter artifacts + dirs · prevents accidental gitignore of project records.
+
+### Added
+
+- **`docs/MIGRATION-FROM-DEV-FLOW.md`** — explicit migration guide for dev-flow adopters. Closes F8.2. Documents the universal-surface skill compatibility (12 skills carry over verbatim · 1 renamed · 13 new ADLC-specific skills). Recommended migration sequence + ADR convention handling + TODO/CHANGELOG handling. Cross-references Trial 5 as the validation evidence.
+
+- **`docs/SPRINT-CONVENTION-COMPAT.md`** — Sprint convention compatibility notes for adopters with existing TODO.md / CHANGELOG / sprint-file shapes. Closes F8.4 (paired with the init.js detection). TL;DR: keep your existing protocol · adlc-flow coexists. Documents 3 validated adopter shapes (temidev · naraly · standard).
+
+- **`templates/SETUP-supabase.md.template`** — Supabase tooling setup template for adopters using Supabase as BaaS. Closes F8.10. Covers Docker requirement · supabase CLI workflow · pre-push checklist · Vault secret provisioning · common pitfalls (PostgREST array-shape · service-role bypass discipline). Surfaced during Trial 5 F3a where Docker dependency blocked idempotent re-run smoke test.
+
+- **`skills/adr-writer/references/adr-amendment-pattern.md`** — Codifies the `## ADR-NNN § Amendment YYYY-MM-DD` pattern (F8.12 promotion · 2-adopter precedent at ADR-046 + ADR-049 §3). When to use vs when to write a new ADR · shape · cross-reference convention · trigger to promote at 3+ amendments.
+
+- **`skills/responsibility-map/references/form-action-wrappers.md`** — Codifies the inline-Server-Action form-action wrapper pattern (F8.13 promotion). Bridges typed structured SAs (testable in isolation) with Next.js form-action surface (browser submit + redirect). Documents the trade-off · when to use vs when to lift to client island · 3 temidev adopter precedents.
+
+- **`skills/lean-doc-generator/references/recon-first-discipline.md`** — Codifies the recon-first rule (F8.15 promotion · 4 cross-trial validations · Sprint 050 + 051a + Trial 5 F3a + Trial 5 F4+F5). Cuts sprint scope 50-85% on mature codebases. When to apply · when NOT to apply · 6-step procedure · trade-off explanation.
+
+### Trial 5 evidence base
+
+- 11 commits on temidev master across 5 trial phases · ~4500 insertions
+- 3 commits on adlc-flow master capturing friction signal
+- Both AI wedges (F3b SoW drafter · F3c clause risk flagger) shipped to 5/6 ADLC gates · 9 numeric pass-thresholds locked in writing BEFORE production code reached VG
+- Trial findings: 8 friction · 3 validations · ~14 positive patterns = 25-31 distinct items (vs Trial 4's 5 + Trial 4b's 8 — Trial 5 is the deepest single-trial signal yet)
+
+### Validated v2.x fixes still working
+
+- F4.2 (Sprint 022 · init.js .claude/CLAUDE.md SKIP) — confirmed at Trial 5 Phase 0 Re-run.
+- F4.4 (v2.3 · /adr-writer detects existing convention) — refined further at init layer via F8.1.
+- F7.5 (Trial 4b · mock-first PoV) — 5th cross-trial validation at Trial 5 F3b P3 prep + F3c P3 prep.
+- F7.6 (Trial 4b · 3-cache-blocks) — applied at temidev F3b ADR-050 §3 (3 blocks) and F3c ADR-051 §3 (2 blocks — taxonomy-only variant).
+- F7.7 (Trial 4b · single-call planner with tool_use) — applied at both F3b ADR-050 §1 and F3c ADR-051 §1.
+
+---
+
 ## [2.7.0] — 2026-05-20
 
 **Trial 4b (umkm-indo PoV build) fixes + pattern promotion.** Closes 2 MEDIUM workflow gaps and 2 LOW doc-additions surfaced while building the umkm-indo landing-page MVP through tasks 1-6 of its ADR-002 plan. Promotes 4 positive patterns from the dogfood loop to canonical references. Full trial signal in [`docs/audit/trial-friction-log.md` § Trial 4b](docs/audit/trial-friction-log.md).

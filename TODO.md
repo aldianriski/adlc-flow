@@ -20,8 +20,20 @@ status: current
 ## Backlog
 
 ### P0 — Pending user action
-- TASK-011 — First commit + push to `aldianriski/adlc-flow` remote (awaits review)
-- TASK-103 — Marketplace publish (GitHub repo public · `gh repo create` · marketplace.json validated by Claude Code marketplace)
+- ~~TASK-011 — First commit + push to `aldianriski/adlc-flow` remote~~ ✓ shipped 2026-05-20 (initial commit 7d19820 · v2.7.0 · 98 files · master tracks origin/master)
+- TASK-103 — Marketplace publish (GitHub repo now public + non-empty · marketplace.json validated by Claude Code marketplace)
+
+### P1 — v2.8.0 (SHIPPED 2026-05-20 · Trial 5)
+- ~~F8.1 — `init.js` detects existing `docs/DECISIONS.md` (single-file ADR) or `docs/adr/` with content; writes POINTER.md not .gitkeep~~ ✓
+- ~~F8.2 — `docs/MIGRATION-FROM-DEV-FLOW.md` for dev-flow → adlc-flow migration guide~~ ✓
+- ~~F8.3 — `init.js` inspects `.claude/settings.json` plugin-enabled state · `--enable` flag patches automatically~~ ✓
+- ~~F8.4 — `init.js` detects TODO.md / CHANGELOG · compat note + `docs/SPRINT-CONVENTION-COMPAT.md`~~ ✓
+- ~~F8.5 — `init.js` conditional next-steps message (skip "customize CLAUDE.md" when file SKIPPED)~~ ✓
+- ~~F8.6 — `init.js` post-run commit-policy guidance for adopter artifacts~~ ✓
+- ~~F8.10 — `templates/SETUP-supabase.md.template` for Docker dependency + Vault provisioning~~ ✓
+- ~~F8.12 — `skills/adr-writer/references/adr-amendment-pattern.md` (ADR § Amendment shape)~~ ✓
+- ~~F8.13 — `skills/responsibility-map/references/form-action-wrappers.md` (inline SA wrapper pattern)~~ ✓
+- ~~F8.15 — `skills/lean-doc-generator/references/recon-first-discipline.md` (4-trial-validated rule)~~ ✓
 
 ### P1 — v2.6.0 (SHIPPED 2026-05-20)
 - ~~TASK-601 — `templates/HYPOTHESIS.md.template` missing `Type` column~~ ✓ Type column added to summary table header + placeholder row + reference line of Type values + detail-block field

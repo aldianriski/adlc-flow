@@ -1,0 +1,94 @@
+# Supabase tooling setup (adopter projects using Supabase as BaaS)
+
+Per Trial 5 finding F8.10 — adopters running adlc-flow against Supabase
+projects need a specific tooling chain. This file documents the
+expectations. Drop this into your adopter project as `docs/SETUP-supabase.md`
+and customize.
+
+## Required tools
+
+| Tool | Purpose | Install |
+|---|---|---|
+| **Docker Desktop** | Local Supabase stack (Postgres + Auth + Storage) | https://docker.com/products/docker-desktop |
+| **Supabase CLI** | Migration push · scratch DB · diff | `npm i -g supabase` or via Scoop on Windows |
+| **psql** (optional) | Direct SQL execution against scratch DB | bundled with PostgreSQL install |
+
+`Docker Desktop` is the critical one. Without it, the supabase CLI's
+`db reset`, `db push --dry-run`, and `migration list` commands cannot
+run against a local scratch DB — migration idempotency testing falls
+back to live-remote-only.
+
+## Recommended workflow per migration
+
+1. **Author migration** at `supabase/migrations/YYYYMMDDHHMMSS_<slug>.sql`
+   following adlc-flow conventions: header docblock with Purpose / Tables /
+   DOWN / DATA · `CREATE ... IF NOT EXISTS` for idempotency · `COMMENT ON
+   TABLE` for searchability.
+
+2. **Idempotent re-run smoke test** against scratch DB:
+   ```
+   supabase db reset --linked=false   # spin up clean local DB
+   # migration auto-applied twice during reset
+   ```
+   If the second apply fails, your migration is NOT idempotent. Fix
+   before push to remote.
+
+3. **Push to remote** at sprint close (deferred batch per
+   Sprint 026 G2 / Sprint 027 T1 / Sprint 032 deferred-batch precedent):
+   ```
+   supabase db push --include-all
+   supabase migration list   # verify zero local-only rows
+   ```
+
+## Pre-push checklist (adopt for sprint close protocol)
+
+- [ ] All migrations in `supabase/migrations/` have a DOWN path documented
+      in the header.
+- [ ] Idempotent re-run verified locally OR explicitly skipped + noted in
+      sprint Execution Log (e.g. "Docker unavailable · push to scratch
+      remote first").
+- [ ] If using `pg_get_constraintdef`-style validation (ADR-046 pattern),
+      pre-push gate script invoked.
+- [ ] Migration push deferred to sprint close OR batched with other
+      sprints' deferred items (per ADR-046 § Amendment 2026-05-11).
+
+## Vault secret provisioning (for AI feature encryption keys)
+
+If your project uses Anthropic + Vault-encrypted PII columns (per
+Sprint 024 T2 / Sprint 032 T2 / Sprint 033 patterns), provision Vault
+secrets manually via Supabase dashboard:
+
+1. Generate 32-byte AES key: `openssl rand -hex 32` → 64 hex chars
+2. Open Supabase Dashboard → Settings → Vault → New Secret
+3. Name it descriptively (e.g. `agreement_signer_key` · `gcal_token_key`).
+4. Paste hex value. Copy the resulting UUID.
+5. Add UUID to your env vars (e.g.
+   `SUPABASE_VAULT_AGREEMENT_SIGNER_KEY_ID=<uuid>`).
+6. Ship a domain-named SECURITY DEFINER RPC for read-side access (see
+   `supabase/migrations/20260520000002_get_agreement_signer_key.sql`
+   from temidev as the precedent example).
+
+NEVER store the raw key in env vars or git. Vault is the canonical
+key-storage path · the RPC bridges to PostgREST without exposing the
+`vault` schema.
+
+## Common pitfalls (Trial 5 F8.10 captured)
+
+- **Docker daemon not running** → `supabase db reset` fails silently.
+  Run `docker info` first to confirm daemon is up.
+- **PostgREST returns nested-joins as arrays** even for logically 1:1
+  FKs (e.g. `service_packages(slug)` returns `service_packages: [{slug}]`).
+  Your TypeScript types must reflect this OR cast through `unknown`.
+  (Trial 5 F3b ADR-050 implementation caught this · documented in commit
+  `5b60ad3` of temidev master.)
+- **RLS bypass via service-role** is real but should be deliberate ·
+  document each `createAdminClient()` invocation site with a comment
+  explaining why service-role privilege is needed there.
+
+## Cross-references
+
+- Trial 5 F8.10 — Docker dependency surfaced during temidev migration push
+- adlc-flow `skills/golden-dataset/references/mock-first-pov.md` — pattern
+  for working around Docker unavailability during P3 prep (mock the SA
+  + run eval pipeline without live DB)
+- Supabase docs — https://supabase.com/docs/guides/database/migrations
