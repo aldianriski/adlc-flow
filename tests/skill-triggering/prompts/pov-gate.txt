@@ -1,0 +1,1 @@
+PoV runs are complete. I have the golden-dataset results in EVAL-SUITE/escalation/BASELINE.md. Produce the VG verdict — go, go-with-concerns, or no-go — based on the pre-committed kill-criteria.

@@ -1,0 +1,1 @@
+We just decided to standardize on pnpm workspaces instead of npm. This is hard to reverse later. Write the architecture decision record so future contributors understand the rationale and alternatives we considered.

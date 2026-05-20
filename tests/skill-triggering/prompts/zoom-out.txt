@@ -1,0 +1,1 @@
+I've never touched the auth area before and I'm about to refactor the session-management code. Give me a bird's-eye module map of the auth surface — entry points, modules, seams — before I dive in.

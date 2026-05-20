@@ -1,0 +1,53 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: initial
+purpose: Anchor baseline for regression deltas at MG (model upgrades) and drift audits
+---
+
+# BASELINE — [feature] [version]
+
+Initial PoV results. Produced by `/golden-dataset` step 7 and locked at VG gate. Referenced by `/pov-gate` for go/no-go and by `/model-upgrade` for regression delta.
+
+## Run metadata
+
+- Run date: YYYY-MM-DD
+- Run ID: pov-NNN
+- N runs per sample: [target, typically ≥30]
+- Sample size: [total samples in golden dataset; matches EVAL-SUITE PLAN § 2]
+- LLM: [model + version pinned]
+- Eval-suite version: `EVAL-SUITE/<feature>/PLAN.md` @ YYYY-MM-DD
+- Trigger: [initial PoV / VG gate / quarterly refresh / model-upgrade run]
+
+## Per-metric results
+
+| Metric | Mean | p50 | p95 | stdev | Pass threshold | Verdict |
+|---|---|---|---|---|---|---|
+| [metric 1] | — | — | — | — | — | PASS / MARGINAL / FAIL |
+| [metric 2] | — | — | — | — | — | PASS / MARGINAL / FAIL |
+| ... | — | — | — | — | — | — |
+
+## Kill-criteria check (per HG hypothesis row)
+
+| Kill-criterion | Triggered? |
+|---|---|
+| [criterion 1] | YES / NO |
+| [criterion 2] | YES / NO |
+
+## Cost projection at production volume
+
+- [volume]/month × [per-call cost] = [monthly cost projection]
+- + eval overhead per PLAN.md § 5: [monthly eval cost]
+- **Total**: [monthly] vs budget cap [from COST-BUDGET.md]
+
+## Notes for VG verdict
+
+- [observations · marginal metrics · iteration plan for any concerns]
+
+---
+
+## Baseline history (append-only)
+
+| Date | Run ID | Reason | Approved by |
+|---|---|---|---|
+| YYYY-MM-DD | pov-NNN | initial baseline | [role] |

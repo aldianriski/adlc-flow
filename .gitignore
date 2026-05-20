@@ -1,0 +1,37 @@
+# Claude Code harness — per-machine, never committed
+.claude/settings.local.json
+.claude/.session-changes.txt
+
+# Node
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Eval / audit artifacts — regenerable outputs only; the canonical reports stay tracked.
+docs/audit/baseline-metrics.md
+docs/audit/baseline-metrics.json
+docs/audit/skill-eval-report.md
+docs/audit/eval-acceptance-*.md
+docs/audits/*
+!docs/audits/.gitkeep
+
+# Skill-triggering harness — per-run logs (timestamped, large stream-json transcripts)
+tests/skill-triggering/logs/
+
+# Graphify build output — costly + per-machine; rebuild via `graphify .` on demand
+graphify-out/
+
+# Adopter-project artifacts (these live in the adopter repo, never in the plugin repo).
+# Anchored to repo root (leading slash) — without it, Windows case-insensitive matching would
+# accidentally block skills/golden-dataset/ (the skill, lowercase) and similar.
+/HYPOTHESIS.md
+/RESPONSIBILITY-MAP.md
+/FEEDBACK-LOG.md
+/MODEL-UPGRADE-LOG.md
+/OBSERVABILITY.md
+/COST-BUDGET.md
+/GOLDEN-DATASET/
+/EVAL-SUITE/

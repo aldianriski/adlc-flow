@@ -1,0 +1,1 @@
+For the new routing agent feature, I need to document which decisions the agent makes autonomously vs which need human pre-approval. Build the human-agent decision/approval grid for this feature.

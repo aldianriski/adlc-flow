@@ -1,0 +1,1 @@
+Our hypothesis is ratified (H-007). Now I need to decide the agent architecture pattern — ReAct, Plan-and-Execute, multi-agent, or hybrid — for this multi-domain support routing feature. Help me choose with documented rationale.

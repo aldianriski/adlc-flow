@@ -1,0 +1,77 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# RESPONSIBILITY-MAP.md — Human–Agent Decision/Approval Grid
+
+Per-feature grid naming which decisions the agent makes autonomously, which require human approval, and what authority each level has. ADLC P1 deliverable; the source article calls this out as "no equivalent in SDLC."
+
+Filled via `/responsibility-map` skill. Updated as new decision points are discovered in P4/P7.
+
+---
+
+## Feature: [name] (H-NNN)
+
+### Decision points
+
+> **Multi-agent grids (F5.3 · Trial 3)**: when ≥2 agents share a decision chain, add a **Chain** column with sequence numbers (`1 → 2 → 3 …`) and use the `Who` column to name the *specific agent* (`classifier-agent`, `billing-specialist`, `coordinator-agent`) instead of generic `agent`. Each row in a chain inherits the downstream authority of the prior row — make this explicit. Single-agent features omit the Chain column.
+
+| Chain | Decision | Who | Approval | Authority | Escalation trigger |
+|---|---|---|---|---|---|
+| 1 | [Low-stakes routing decision, e.g. "classify ticket domain"] | `classifier-agent` | `none` | scoped (enum-bounded) | confidence < 0.7 → human-triage |
+| 2 | [Specialist draft, e.g. "draft billing response"] | `billing-specialist` | `none` (intermediate) | scoped (own-domain only) | cross-domain detected → coordinator |
+| 3 | [Quality gate, e.g. "review draft + decide send/escalate"] | `coordinator-agent` | `human-pre` (pilot) → `human-post` (post-pilot) | advisory | confidence < 0.8 OR refund-keyword → human |
+| — | [Irreversible action, e.g. "issue refund"] | `human` | always human-only | n/a (advisory only) | refund-keyword detected → flag human |
+
+> Add 1 row per concrete decision point. Real features typically have 5-10 rows. Categories: action authority · quality gates · cost ceilings · unsafe-zone detection · conflict resolution. For peer-network / hierarchical multi-agent patterns, use `1a · 1b · 1c` (peer) or `1.1 · 1.2` (hierarchical) chain notation.
+
+### Unsafe-autonomy zones
+
+Categories where the agent MUST defer to a human regardless of confidence:
+
+- **[Irreversible action category]**: [rule — when to hard-handoff]
+- **[Legal / compliance category]**: [rule]
+- **[Financial transaction category]**: [rule]
+- **[PII / sensitive-data category]**: [rule]
+
+### Compliance check
+
+Mapping HG-declared constraints (from HYPOTHESIS.md kill-criteria) to grid rows that enforce them:
+
+- Constraint: [from H-NNN] → enforced by: [row reference above]
+- Constraint: [from H-NNN] → enforced by: [row reference]
+
+### Cross-agent context-handoff policy (multi-agent only · F5.7 Trial 3)
+
+> Required when the grid has ≥2 distinct `Who` agents. Omit for single-agent features.
+
+How context passes between agents — declared once, audited at every handoff. Trial 3 found inter-agent prompt-injection succeeds when handoff envelopes pass raw user content; explicit policy is the v2.4 mitigation pattern.
+
+- **Handoff envelope format**: structured JSON only (instruction-following patterns in user input cannot survive JSON-encoding). Free-text passthrough is **forbidden** between agents.
+- **What CAN pass**: classifier output (enum), specialist draft (string field), confidence score (float), provenance pointer (record ID).
+- **What CANNOT pass**: raw user input verbatim (must be re-quoted under a typed field); upstream agent's "system" or "instruction" framing; tool-call traces from prior agent.
+- **Pre-filter at boundary**: regex strip on common injection patterns (`ignore previous`, `you are now`, `system:`, code-fence with directive language) BEFORE passing to next agent.
+- **Role-stability prompt**: each downstream agent re-asserts its role in its own system prompt — never relies on upstream framing.
+- **Audit hook**: log every handoff envelope to the eval suite's per-agent stream; injection-resistance metric runs over these logs.
+
+### Kill-switch
+
+How a human stops a runaway agent on this feature:
+- **Per-task**: [mechanism, e.g. flag on individual record disables agent for that record]
+- **Per-user / per-cohort**: [allowlist / opt-out mechanism]
+- **Per-agent (multi-agent only · F5.9 v2.5)**: operator can disable any single agent within <30s; disabled traffic falls back to either (a) the human queue OR (b) a designated peer/upstream agent. List per-agent overrides explicitly so on-call doesn't have to choose under pressure. Single-agent features omit this row.
+- **Global**: [feature flag · canary-shrink · routing override; specify recovery time]
+
+### Open questions (defer to AG)
+
+Decisions that emerge during scoping but resolve cleanly at architecture phase:
+- [question 1] → resolves at AG (e.g. "does agent have read access to customer history?")
+- [question 2] → resolves at AG
+
+---
+
+## How to add a feature
+
+Run `/responsibility-map --feature <name>`. The skill walks decision points one at a time and enforces hard rules (no `full` authority without kill-switch · irreversible actions must be `human-pre` · compliance constraints from HG must map to a grid row).

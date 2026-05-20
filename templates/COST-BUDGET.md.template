@@ -1,0 +1,59 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# COST-BUDGET.md — Token-Economics Budget Per Feature
+
+Cross-phase artifact. Drafted at AG (Architecture Gate), refined in P4 with actual measurements, audited in P7. Generated/maintained via `/cost-budget` skill.
+
+> **Adopter project owns billing measurement** (OpenLLMetry, Helicone, native provider billing). This file plans the targets and alert thresholds.
+
+---
+
+## Feature: [name]
+
+### Per-call cost ceiling
+- Average expected: $[X] per task
+- Outlier threshold: $[Y] (log + investigate above)
+- Hard cap: $[Z] (abort task, route to fallback above)
+
+### Aggregate budgets
+| Period | Budget | Alert at | Auto-disable at |
+|---|---|---|---|
+| Daily | $[X] | 80% | [yes/no] |
+| Weekly | $[X] | 80% | [yes/no] |
+| Monthly | $[X] | 80% | [yes/no] |
+
+### Cost drivers
+- Prompt size (system + context): [N] tokens average
+- Completion length: typical [N] · p95 [N] · max [N]
+- Tool calls per task: [N] average · [N] p95
+- Embedding lookups: [N] per task
+- Eval-run overhead: [N] runs/day × $[X] per run
+
+### Optimization levers planned
+- Prompt caching: [eligible blocks named]
+- Model routing: [low-stakes paths routed to smaller model]
+- Context pruning: [rules under token pressure]
+- Tool-call batching: [opportunities]
+- Eval sampling: [audit-rate vs. per-call where applicable]
+
+### Alert routing
+| Threshold | Channel | On-call? |
+|---|---|---|
+| 80% daily | [channel] | no |
+| 100% daily | [channel] | yes |
+| Outlier spike (3x baseline) | [channel] | yes |
+
+### Owner + review cadence
+- Budget owner: [name]
+- Revision approval: requires owner sign-off; record old value + reason in this section
+- Review cadence: [monthly / quarterly]
+
+---
+
+## How to add a feature
+
+Run `/cost-budget --feature <name>`. The skill walks all sections and enforces hard rules (no per-call ceiling without numeric value, eval overhead must be included, three-level threshold separation).

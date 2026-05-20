@@ -1,0 +1,65 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# HYPOTHESIS.md — Agentic Feature Hypothesis Register
+
+Each hypothesis is a falsifiable claim with kill-criteria written *before* prototyping. Two-tier structure:
+- **Summary table** at top for at-a-glance scan
+- **Per-ID detail block** below for full text (filled by `/hypothesis-register` step 8)
+
+Filled via `/hypothesis-register` skill. Updated by `/pov-gate` (status only) and `/drift-audit` (status if drift kills a previously-PROVED hypothesis).
+
+> **Status values:** `OPEN` (being prototyped) · `PROVED` (passed VG) · `KILLED` (failed kill-criteria) · `DEFERRED` (paused; may revisit). VG verdict appended as `OPEN (VG: GO_WITH_CONCERNS @ YYYY-MM-DD)` etc.
+
+---
+
+## Summary
+
+| ID | Date | Type | Pain (1-line) | Hypothesis (1-line) | Outcome | Status |
+|---|---|---|---|---|---|---|
+| H-NNN | YYYY-MM-DD | agentic | [pain headline] | [headline claim] | [A1-A8] | OPEN |
+
+> **Type values** (per ADR-007): `agentic` (default · LLM-core / RAG / multi-agent) · `conversion` (marketing · signup funnels) · `latency` (perf SLO) · `reliability` (uptime · error-rate · retry-budget) · `other` (falsifiable non-agentic claim that doesn't fit above).
+
+---
+
+## H-NNN detail
+
+**Type**: agentic
+
+**Pain (full)**: [paragraph — specific user/operator + workflow step + measurable suffering]
+
+**Hypothesis (full)**:
+- Behavior: [what the agent does]
+- Benefit: [observable improvement]
+- User: [specific affected user/operator]
+- Conditions: [where/when the claim applies]
+- Metric + threshold: [observable measurement + numeric pass-threshold]
+
+**Kill-criteria (written BEFORE prototyping)**:
+- Abort if [metric] [comparison] [threshold] after [time/effort budget]
+- OR [second criterion]
+- OR [third criterion]
+- (4+ ORs OK; kill-criteria must be measurable and time-bounded)
+
+**Skip-when (non-tautological alternative)**: [the simpler / deterministic / existing-tool alternative that should be ruled out first]
+
+**Outcome rationale**: [why A1-A8 outcomes are claimed]
+
+**VG verdict** (appended by `/pov-gate`):
+- (filled in at VG; see `EVAL-SUITE/<feature>/VG-VERDICTS.md` for full per-run history)
+
+---
+
+## How to add a row
+
+1. Run `/hypothesis-register "<your pain point>"`.
+2. The skill walks you through 8 steps including required kill-criteria.
+3. Approve to write — never hand-edit. Skill writes BOTH the summary row + the detail block.
+
+## Why this artifact exists
+
+Without explicit kill-criteria, agentic experiments drag past viability. ADLC's signature discipline: hypothesis → PoV → hard go/no-go. See `docs/research/ADLC-source.md` (vendored EPAM extract) for source rationale.

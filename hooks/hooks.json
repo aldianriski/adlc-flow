@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/session-start.js\"",
+            "description": "adlc-flow bootstrap: verify .claude/CLAUDE.md (fail if missing) + canonical artifacts presence (warn). Cross-platform Node implementation."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/artifact-integrity.js\"",
+            "description": "Artifact-integrity check: when canonical ADLC artifacts (HYPOTHESIS / RESPONSIBILITY-MAP / FEEDBACK-LOG / MODEL-UPGRADE-LOG / OBSERVABILITY / COST-BUDGET) are edited, verify last_updated stamp is current. Warn-only."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# FEEDBACK-LOG.md — User Feedback → Prompt-Update Mapping
+
+ADLC P7 operational artifact. Each row connects a user feedback event to a concrete prompt/context change with traceability. Without this log, P7 becomes "tweak the prompt and forget" — anti-pattern called out in the source article.
+
+| Date | Source | Sentiment | Pattern | Action | Prompt-change PR | Verified at |
+|---|---|---|---|---|---|---|
+| YYYY-MM-DD | user / thumbs-down / red-team | neg / pos / mixed | [behavioral pattern observed] | [prompt/context update] | [link] | [eval-run-id or "regressed"] |
+
+---
+
+## Add a row when
+
+- A user reports unexpected agent behavior (incl. thumbs-down events)
+- Drift audit (`/drift-audit`) surfaces a behavioral shift
+- A red-team finding lands
+- Operational dashboard alerts trigger investigation
+
+Do NOT silently edit the prompt without a row here. Untracked prompt changes are the dominant source of unexplained behavior shifts.

@@ -1,0 +1,65 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# OBSERVABILITY.md — AI-Specific Observability Schema
+
+ADLC P6 artifact. **Schema and alert-rule config** only — not live data. Adopter project owns the actual telemetry stack (OpenLLMetry / Helicone / custom). This file is the *contract* of what gets measured.
+
+Generated/maintained via `/ai-observe` skill.
+
+---
+
+## Metrics (per feature)
+
+### Behavioral
+| Metric | Definition | Source | Sample rate | Alert threshold |
+|---|---|---|---|---|
+| Hallucination rate | [definition] | [eval-judge call / RAG faithfulness / domain-specific] | [1.0 / 0.1 sample] | [threshold] |
+| Output-distribution drift | [statistical test] | [baseline vs. current window] | [window size] | [threshold] |
+| Toxicity | [definition] | [content-mod API / LLM judge] | [rate] | [threshold] |
+| Tool-call success rate | [definition] | [orchestrator logs] | [rate] | [threshold] |
+
+### Operational
+| Metric | Definition | Source | Sample rate | Alert threshold |
+|---|---|---|---|---|
+| Latency p50/p95/p99 | [definition] | [tracing] | [rate] | [threshold] |
+| Cost per task | $ tokens + tool-calls | [billing] | [rate] | [threshold] |
+| Escalation rate | % tasks routed to human | [agent runtime] | [rate] | [threshold] |
+| Confidence-on-low-quality | avg confidence when output later flagged | [eval pipeline] | [rate] | [threshold] |
+
+### Drift signals
+| Metric | Triggers | Action |
+|---|---|---|
+| Input distribution shift | [test result above threshold] | Schedule `/drift-audit` |
+| Eval delta | [metric] moves > tolerance from baseline | Open ticket; consider golden-dataset refresh |
+| Model-provider notification | Provider blog post / changelog entry | Schedule MG gate run |
+
+---
+
+## Alert routing
+
+| Severity | Channel | On-call? |
+|---|---|---|
+| Critical (escalation rate > X, cost spike > Y) | [channel] | yes |
+| Warning (drift signal, threshold drift) | [channel] | no, batched |
+| Info (eval runs, model-upgrade events) | [channel] | no |
+
+---
+
+## Rollback / containment hooks
+
+Conditions under which the agent feature is automatically disabled or rate-limited:
+
+- [condition]: [action — disable / canary-shrink / route 100% to fallback]
+
+---
+
+## Refresh cadence
+
+Update this file when:
+- New metric added at any gate
+- Alert threshold revised (record old value + reason)
+- New feature added to coverage

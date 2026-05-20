@@ -1,0 +1,1 @@
+I just opened this project in a fresh Claude Code session. Load my project context — CLAUDE.md, CONTEXT.md, the active sprint, canonical artifacts — and give me a health check before I start any work.

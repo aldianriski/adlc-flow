@@ -1,0 +1,29 @@
+---
+owner: [CUSTOMIZE — role, e.g. "Tech Lead"]
+last_updated: YYYY-MM-DD
+status: current
+---
+
+# MODEL-UPGRADE-LOG.md — LLM Version Pin History
+
+ADLC P7 / MG gate artifact. Records every LLM provider model version adopted, with regression-eval results that justified the adoption.
+
+> **Model upgrades are the dominant cause of silent behavior shifts.** Without this log, "the model changed" becomes impossible to attribute.
+
+| Date | Feature(s) | From → To | Regression delta | Cost delta | Verdict | Notes |
+|---|---|---|---|---|---|---|
+| YYYY-MM-DD | [feature] | [model-vX] → [model-vY] | [metrics summary] | [+/- $/run] | ADOPT / DEFER / REJECT | [link to MG eval-run + ADR if scope-changing] |
+
+---
+
+## Add a row when
+
+- LLM provider releases a new model version of one already in use
+- Adopter switches between providers (Anthropic ↔ OpenAI ↔ open-source)
+- Same model, but provider signals a quality-impacting change (RLHF revision, system-prompt change)
+
+Run `/model-upgrade` to dispatch the regression suite. The MG gate consumes the resulting metrics and produces the row.
+
+## Rollback path
+
+For any `ADOPT` row, record where the previous version is pinned + how to roll back if production surfaces a regression the eval suite missed. Hidden rollback paths = no rollback paths.

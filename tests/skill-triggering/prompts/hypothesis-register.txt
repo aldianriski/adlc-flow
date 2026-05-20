@@ -1,0 +1,1 @@
+We're considering using an LLM to auto-route support tickets across 3 specialist queues. I want to write down the falsifiable claim and the kill-criteria before we build anything — what accuracy, cost, and time-to-route would make us abort.
