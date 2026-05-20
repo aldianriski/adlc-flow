@@ -191,15 +191,21 @@ Full migration guide: [`docs/MIGRATION-FROM-DEV-FLOW.md`](docs/MIGRATION-FROM-DE
 
 ---
 
-## Status (v2.9.0 · 2026-05-20)
+## Status (v3.0.0 · 2026-05-20 · Tier A internal-evidence validated)
 
-- 28 skills · 11 specialist agents · 2 Node hooks · 12 canonical artifact templates · 8 ADRs · vendored ADLC source extract
+- 28 skills · 11 specialist agents · 2 Node hooks · 12 canonical artifact templates · 9 ADRs · vendored ADLC source extract · 0 structural violations
 - Lifecycle traversable end-to-end from `init` through `operate`
-- Validated against 5 dogfood trials: ticket triage (greenfield agentic) · Naraly landing (mature existing traditional) · multi-agent escalation (NO_GO kill-criterion validation) · umkm-indo PoV build (real product · pre-VG arc) · temidev mature adoption (49+ ADRs · 31 closed sprints · full ADLC arc to 5/6 gates on 2 AI wedges)
-- Both AI wedges through F3b (SoW drafter) + F3c (clause risk flagger) have 9 numeric kill-criteria locked in writing BEFORE production code reached VG
-- v2.9 ships Tier 2 high-impact templates (SERVER-ACTION-RLS · I18N-BILINGUAL · DEPLOY-PLAN) + scenario→skill cheatsheet · closing Trial 2's LOW-priority backlog
+- Validated against 5 dogfood trials: ticket triage (greenfield agentic) · Naraly landing (mature traditional) · multi-agent escalation (NO_GO kill-criterion validation) · umkm-indo PoV build (real product · pre-VG arc) · temidev mature adoption (47 ADRs · 32 closed sprints · full ADLC arc to 5/6 gates on 2 AI wedges)
+- Both temidev AI wedges (F3b SoW drafter + F3c clause-risk flagger) have 9 numeric kill-criteria locked in writing BEFORE production code reached VG
+- All 7 post-VG ADLC skills exercised against temidev F3b real implementation per ADR-009; artifacts persisted at `temidev/docs/tier3-exercise/`
+- 50-sample golden datasets + mock-mode eval pipelines validated end-to-end ($0 spend · F3b 45/50 · F3c 36/50)
 
-**v3.0 stability checkpoint** (future) — pending one adopter shipping an agentic feature through full lifecycle (post-VG · RG · MG · P5-P7). The 7 post-VG ADLC skills (`/release-readiness` · `/canary-plan` · `/ai-observe` · `/model-upgrade` · `/drift-audit` · `/context-engineer` · `/cost-budget` live wiring) are deployed but unvalidated against production data.
+**v3.0 release framework (ADR-009)** — Two-tier stability checkpoint:
+
+- **Tier A (this release)** — internal-evidence validated: structural cleanliness · 5 trials · 7 post-VG skills exercised against real adopter · mature adopter through P4 · 50-sample eval validated
+- **Tier B (v3.1+)** — external-adopter evidence: ≥1 non-maintainer adopter through full P0-P7 arc · live billing reconciliation · 1 quarterly /drift-audit on live data
+
+v3.1 promotes when ≥3 Tier B unblockers are met. Adopter feedback drives the cycle.
 
 Built on Claude Code by [Aldian Rizki](mailto:aldian.mar@gmail.com).
 

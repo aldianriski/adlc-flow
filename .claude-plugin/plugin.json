@@ -1,6 +1,6 @@
 {
   "name": "adlc-flow",
-  "version": "2.10.0",
+  "version": "3.0.0",
   "description": "Unified phase-gated workflow scaffold for modern software development — both traditional code AND agentic products. Implements EPAM's Agentic Development Lifecycle (ADLC) + universal dev workflow (PR review, ADR, sprint protocols, debugging, refactoring). Successor to dev-flow per ADR-004. Built on Claude Code.",
   "author": {
     "name": "Aldian Rizki",

@@ -13,7 +13,7 @@ status: current
 
 ## Active Sprint
 
-`— none — (v2.10.0 closed; v3.0.0 commit pending)`
+`— none — (v3.0.0 SHIPPED · Tier A · push to origin pending user action)`
 
 ---
 
@@ -21,7 +21,12 @@ status: current
 
 ### P0 — Pending user action
 - ~~TASK-011 — First commit + push to `aldianriski/adlc-flow` remote~~ ✓ shipped 2026-05-20 (initial commit 7d19820 · v2.7.0 · 98 files · master tracks origin/master)
-- TASK-103 — Marketplace publish (GitHub repo now public + non-empty · marketplace.json validated by Claude Code marketplace)
+- **TASK-103 — Push origin/master + announce v3.0.0** (8 local commits ahead of origin: v2.7→v2.10→v3.0 + Trial 5 audits; marketplace.json @ 3.0.0)
+- TASK-104 — README status banner refresh ("v3.0.0 · Tier A internal-evidence validated · adopting external feedback toward v3.1")
+
+### P0 — v3.0.0 (SHIPPED 2026-05-20 · stability checkpoint · Tier A internal-evidence)
+- ~~Bump 2.10.0 → 3.0.0 · plugin.json + marketplace.json + CHANGELOG~~ ✓
+- ~~README banner update (Tier A · earned v3.0 status)~~ pending TASK-104
 
 ### P1 — v2.10.0 (SHIPPED 2026-05-20 · v3.0 Tier A readiness sprint)
 - ~~Phase A — plugin completeness audit (1 violation fixed + 6 orphan references linked + Trial 5 closing addendum)~~ ✓
@@ -132,7 +137,7 @@ Detail in [`CHANGELOG.md`](CHANGELOG.md). One-line ribbon, most recent first:
 - **v2.8.0** *(shipped 2026-05-20)* — Trial 5 mature-adopter fixes (10 items · `init.js` rewrite · MIGRATION + SPRINT-CONVENTION-COMPAT docs · 3 promoted references).
 - **v2.9.0** *(shipped 2026-05-20)* — Marketplace-readiness sprint. Trial 2 LOW backlog closed (F4.8-F4.13 · 3 high-impact templates + scenario cheatsheet). Adopter-onboarding cliff fixed.
 - **v2.10.0** *(shipped 2026-05-20)* — **v3.0 Tier A readiness sprint** per ADR-009. 1 structural violation fixed · 6 orphan-reference links added · Trial 5 closing addendum · golden datasets expanded to 50 samples · mock-mode eval validated end-to-end · 7 Tier 3 skills exercised against real adopter data. Tier A criteria all signed.
-- **v3.0.0** *(target — next release)* — **v3.0 stability checkpoint (Tier A · internal-evidence validated)** per ADR-009. Tier B external-adopter evidence becomes the v3.1.0 gate.
+- **v3.0.0** *(shipped 2026-05-20)* — **v3.0 stability checkpoint (Tier A · internal-evidence validated)** per ADR-009. Cumulative result of v0.1 → v3.0 arc: 28 skills · 11 agents · 12 templates · 9 ADRs · 5 dogfood trials · 0 structural violations. Tier B external-adopter evidence becomes the v3.1.0 gate.
 - **v3.1.0** *(future)* — Tier B external-adopter validation: ≥1 external adopter through full P0-P7 arc · live billing reconciliation · 1 quarterly /drift-audit on live data.
 - **v3.x+** *(future)* — F6.3 cost-kill marketing · F6.4 clarification-flow reference · multi-language adopter templates · prompt-reviewer attack-corpus · cost-analyst billing-API.
 

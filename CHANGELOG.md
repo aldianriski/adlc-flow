@@ -4,6 +4,41 @@ All notable changes to `adlc-flow` are documented here. Format: [Keep a Changelo
 
 ---
 
+## [3.0.0] — 2026-05-20
+
+**v3.0 stability checkpoint (Tier A · internal-evidence validated).** Per ADR-009, the plugin earns the v3.0 semver bump on Tier A criteria: structural cleanliness · 5 dogfood trials · 7 post-VG skills exercised against real adopter data · ≥1 mature adopter through P4 · eval pipeline validated at 50-sample scale. Tier B external-adopter evidence becomes the v3.1 gate.
+
+### What Tier A means
+
+Adopters at v3.0.0 are getting:
+- 28 skills · 11 agents · 12 templates · 9 ADRs · 0 structural violations
+- 5 dogfood trials worth of friction-tested patterns (Trial 1-5: ticket-triage · landing · multi-agent customer-support · umkm-indo LLM-core · temidev mature-project)
+- Every promoted positive pattern reachable from its parent SKILL.md (no orphan references)
+- 7 post-VG skills validated to produce coherent artifacts against real production codebase (temidev F3b SoW drafter)
+- 50-sample eval pipelines for SoW + clause-risk validated end-to-end at $0 in mock mode
+- 2-tier release framework documented in ADR-009: this is Tier A · Tier B awaits
+
+### What Tier A does NOT mean
+
+Per ADR-009 explicit honesty:
+- No external (non-maintainer) adopter has yet shipped through full P0-P7 arc using adlc-flow
+- VG · RG · MG gate live measurements are projections, not real-data measurements (temidev pending budget cycle for ~Rp 130k LLM spend)
+- Live billing API reconciliation not yet exercised
+- 10 known debt items (TD-RG/O/MG/CE/CB) tracked in `temidev/docs/tier3-exercise/README.md` for v3.1+ closure
+
+Tier B becomes earnable when ≥3 of ADR-009's external-adopter unblockers are met (e.g., external adopter completes init · reaches P3 · runs first /drift-audit · live billing reconciliation within ±15%).
+
+### Changed
+
+- **`.claude-plugin/plugin.json` + `marketplace.json`** — bump to 3.0.0
+- No skill behavioral changes from 2.10.0 — version bump reflects the cumulative Tier A evidence earned across 2.x
+
+### Marketplace adopter signal
+
+`/plugin marketplace add aldianriski/adlc-flow` installs v3.0.0 directly. README's status banner now reads "v3.0.0 · Tier A internal-evidence validated · adopting external feedback toward v3.1."
+
+---
+
 ## [2.10.0] — 2026-05-20
 
 **v3.0 readiness sprint — Tier A internal-evidence checkpoint.** Closes Phase A plugin completeness audit findings (1 structural violation + 6 orphan references), Phase B 50-sample golden dataset expansion + mock-mode eval validation, and Phase C 7-skill Tier 3 ADLC arc exercise against temidev real adopter data. Anchors the two-tier v3.0 readiness criterion (ADR-009).
