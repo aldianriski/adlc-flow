@@ -73,4 +73,8 @@ EVAL-SUITE/<feature>/BASELINE.md  # PoV results anchoring regression deltas; app
 ❌ **No version pointer** — silent rebases make regression deltas meaningless
 ❌ **PII in samples** — compliance landmine; halt and remediate before any commit
 
+## References
+
+- `references/mock-first-pov.md` — mock-first PoV scaffold pattern; validates eval pipeline at $0 before live LLM (3 cross-trial validations: Trial 1 · Trial 4b · Trial 5)
+
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).

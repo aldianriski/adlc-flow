@@ -85,4 +85,9 @@ status: current
 ❌ **Authority `scoped` without naming the scope** — vague scopes leak; force explicit category list
 ❌ **Irreversible action set to `human-post`** — retroactive approval can't undo deletes/sends; promote to `human-pre`
 
+## References
+
+- `references/preview-gate-ux.md` — preview-gate + cost-banner UX pattern (Trial 4b F7.8)
+- `references/form-action-wrappers.md` — inline server-action wrapper pattern for SSR forms (Trial 5 F8.13)
+
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).

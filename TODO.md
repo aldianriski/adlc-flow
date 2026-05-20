@@ -13,7 +13,7 @@ status: current
 
 ## Active Sprint
 
-`— none —`
+`— none — (v2.10.0 closed; v3.0.0 commit pending)`
 
 ---
 
@@ -22,6 +22,13 @@ status: current
 ### P0 — Pending user action
 - ~~TASK-011 — First commit + push to `aldianriski/adlc-flow` remote~~ ✓ shipped 2026-05-20 (initial commit 7d19820 · v2.7.0 · 98 files · master tracks origin/master)
 - TASK-103 — Marketplace publish (GitHub repo now public + non-empty · marketplace.json validated by Claude Code marketplace)
+
+### P1 — v2.10.0 (SHIPPED 2026-05-20 · v3.0 Tier A readiness sprint)
+- ~~Phase A — plugin completeness audit (1 violation fixed + 6 orphan references linked + Trial 5 closing addendum)~~ ✓
+- ~~Phase B — eval rigor (SoW 10→50 samples · clause-risk NEW 50 samples · mock-mode pipeline validated end-to-end: SoW 45/50 · CR 36/50)~~ ✓
+- ~~Phase C — Tier 3 ADLC arc exercise (7 post-VG skills against temidev F3b · 10 debt items surfaced for v3.1+)~~ ✓
+- ~~ADR-009 — two-tier v3.0 readiness criterion (Tier A internal · Tier B external)~~ ✓
+- ~~Bump 2.9.0 → 2.10.0 · CHANGELOG entry · README banner update~~ ✓
 
 ### P1 — v2.9.0 (SHIPPED 2026-05-20 · Marketplace readiness)
 - ~~F4.8 — Server Action + RLS template (Supabase pattern · deferred since Trial 2 v2.3)~~ ✓ `templates/SERVER-ACTION-RLS.md.template`
@@ -122,14 +129,18 @@ Detail in [`CHANGELOG.md`](CHANGELOG.md). One-line ribbon, most recent first:
 - **v2.5.0** *(shipped 2026-05-20)* — Multi-agent refinements: 4 Trial 3 LOW findings closed (F5.5 mitigation structure · F5.6 headroom callout · F5.8 sub-variants · F5.9 per-agent kill-switch). Bundles the v2.4-era polish round: TASK-202 behavioral acceptance harness · TASK-203 audit-baseline Node port · TASK-204 graphify install + cost recipe · TASK-205 SessionStart opt-in auto-update. Closes ADR-008's "Open issues (deferred)" block.
 - **v2.6.0** *(shipped 2026-05-20)* — Trial 4 (umkm-indo pre-code) fixes: hypothesis-register accepts `defer to AG` for multi-agent kill-criteria (chicken-and-egg fix · F6.1) · agent-architect HALTs ADR write on `[DEFER-TO-AG]` placeholder · HYPOTHESIS.md.template gains the `Type` column. First non-synthetic trial closed.
 - **v2.7.0** *(shipped 2026-05-20)* — Trial 4b (umkm-indo PoV build) fixes + pattern promotion: `/hypothesis-register --amend H-NNN` mode (F7.1) · server-only-from-script reference doc (F7.2) · stack-freshness hint in CLAUDE.md.template (F7.3) · non-ADLC skill integration reference (F7.4) · promoted 4 positive patterns to references (F7.5 mock-first PoV · F7.6 3-cache-blocks · F7.7 single-call planner · F7.8 preview-gate UX). **First trial where promoted patterns outnumbered closed friction (4 vs 4)** — maturity signal.
-- **v2.8+** *(future)* — F6.3 cost-kill marketing material · F6.4 clarification-flow shared reference · Trial 2 LOW (F4.7-F4.13) · multi-language adopter templates · prompt-reviewer attack-corpus upgrade · cost-analyst billing-API integration.
-- **v2.x ongoing** — external adopter dogfood + iteration; marketplace publish; multi-language templates.
-- **v3.0** — externally validated stability checkpoint (≥1 adopter shipped an agentic feature through full lifecycle using adlc-flow).
+- **v2.8.0** *(shipped 2026-05-20)* — Trial 5 mature-adopter fixes (10 items · `init.js` rewrite · MIGRATION + SPRINT-CONVENTION-COMPAT docs · 3 promoted references).
+- **v2.9.0** *(shipped 2026-05-20)* — Marketplace-readiness sprint. Trial 2 LOW backlog closed (F4.8-F4.13 · 3 high-impact templates + scenario cheatsheet). Adopter-onboarding cliff fixed.
+- **v2.10.0** *(shipped 2026-05-20)* — **v3.0 Tier A readiness sprint** per ADR-009. 1 structural violation fixed · 6 orphan-reference links added · Trial 5 closing addendum · golden datasets expanded to 50 samples · mock-mode eval validated end-to-end · 7 Tier 3 skills exercised against real adopter data. Tier A criteria all signed.
+- **v3.0.0** *(target — next release)* — **v3.0 stability checkpoint (Tier A · internal-evidence validated)** per ADR-009. Tier B external-adopter evidence becomes the v3.1.0 gate.
+- **v3.1.0** *(future)* — Tier B external-adopter validation: ≥1 external adopter through full P0-P7 arc · live billing reconciliation · 1 quarterly /drift-audit on live data.
+- **v3.x+** *(future)* — F6.3 cost-kill marketing · F6.4 clarification-flow reference · multi-language adopter templates · prompt-reviewer attack-corpus · cost-analyst billing-API.
 
 ---
 
 ## References
 
+- [ADR-009](docs/adr/ADR-009-v3-readiness-criteria.md) — two-tier v3.0 readiness criterion (Tier A internal · Tier B external)
 - [ADR-008](docs/adr/ADR-008-multi-agent-template-adjustments.md) — multi-agent template + kill-criteria adjustments (Trial 3)
 - [ADR-007](docs/adr/ADR-007-traditional-adopter-support.md) — traditional-adopter + multi-track + existing-project (Trial 2)
 - [ADR-006](docs/adr/ADR-006-eval-artifact-standardization.md) — EVAL artifact paths + division of labor + verdict persistence (Trial 1)

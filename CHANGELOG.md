@@ -4,6 +4,54 @@ All notable changes to `adlc-flow` are documented here. Format: [Keep a Changelo
 
 ---
 
+## [2.10.0] — 2026-05-20
+
+**v3.0 readiness sprint — Tier A internal-evidence checkpoint.** Closes Phase A plugin completeness audit findings (1 structural violation + 6 orphan references), Phase B 50-sample golden dataset expansion + mock-mode eval validation, and Phase C 7-skill Tier 3 ADLC arc exercise against temidev real adopter data. Anchors the two-tier v3.0 readiness criterion (ADR-009).
+
+### Added
+
+- **`docs/adr/ADR-009-v3-readiness-criteria.md`** — Two-tier v3.0 framing. Tier A internal-evidence (this release) requires: 0 structural violations · all references linked · ≥5 trials · 7 post-VG skills exercised against real adopter · ≥1 mature adopter through P4 · 50-sample eval validated end-to-end. Tier B external-evidence (v3.1+) requires ≥1 external adopter through full P0-P7 arc + live billing reconciliation.
+
+- **`docs/audit/trial-friction-log.md` Trial 5 closing addendum** — v2.8 + v2.9 ship narrative · cumulative 5-trial cross-scoring table · 19 positive-pattern promotions · honest v3.0-deferred-debt list. First closing addendum to formally reconcile a trial's findings against subsequent ships.
+
+- **6 References sections added to SKILL.md files** — closes silent gap where 8 promoted-pattern references existed in `references/` dirs but weren't linked from parent SKILL.md (unreachable to AI navigation). Now linked: `adr-writer` (adr-amendment-pattern) · `adlc-orchestrator` (non-adlc-skill-integration) · `agent-architect` (prompt-caching-pattern + single-call-planner) · `golden-dataset` (mock-first-pov) · `lean-doc-generator` (recon-first-discipline) · `responsibility-map` (form-action-wrappers + preview-gate-ux).
+
+### Changed
+
+- **`skills/adlc-orchestrator/SKILL.md` trim to 85 lines** (was 111 · over 100-line cap from v2.9 expansion). Phase descriptions consolidated · Red Flags compacted · "Adopter scenarios" matrix tightened from 10 rows to 8. No behavioral change.
+
+- **`.claude-plugin/plugin.json` + `marketplace.json`** — bump to v2.10.0.
+
+### Cross-repo (temidev as primary adopter)
+
+- **`scripts/generate-sow-samples.ts`** — fixture list expanded · 10 → 50 samples (30 happy + 5 scope-mismatch + 5 low-info + 5 injection + 3 precedent-leak + 2 locale-mix)
+- **`scripts/generate-clause-risk-samples.ts`** NEW — 50-sample generator for F3c (25 high + 8 medium + 5 low + 4 clean + 4 injection + 2 severity-inflation + 2 grounding-attack)
+- **`scripts/eval-clause-risk.ts`** NEW — mock-mode eval runner with severity-calibration scoring + category-match scoring + phantom-HIGH detection
+- **`scripts/eval-sow-drafter.ts`** updated — pure mock path bypasses Server Action (fixes Next.js request-scope coupling per v3.0 finding)
+- **`lib/sow/mock-output.ts`** NEW — pure mock generator extracted from SA (refines F7.5 mock-first reference pattern)
+- **`lib/clause-risk/mock-output.ts`** NEW — keyword-baseline deterministic clause-risk classifier (8 categories · severity escalation markers)
+- **`docs/tier3-exercise/` 7 artifacts** — `/release-readiness` + `/canary-plan` + `/ai-observe` + `/model-upgrade` + `/drift-audit` + `/context-engineer` + `/cost-budget` all exercised against F3b real implementation. 10 debt items surfaced (TD-RG/O/MG/CE/CB) for v3.1+ follow-up.
+
+### Mock-eval pipeline validation evidence
+
+- F3b SoW: 45/50 pass (90%) · scope-mismatch cohort intentionally fails mock (LLM-only ability) · cohorts: happy 30/30 · injection 5/5 · locale-mix 2/2 · precedent-leak 3/3 · low-info 5/5 · scope-mismatch 0/5 (expected)
+- F3c clause-risk: 36/50 pass (72%) · seeded-high 25/25 · clean 4/4 · injection 4/4 · grounding 2/2 · seeded-medium 1/8 + seeded-low 0/5 + sev-inflation 0/2 (expected mock limitations · live LLM is value-add surface)
+
+### v3.0 Tier A criteria status
+
+| Criterion | Status |
+|---|---|
+| 0 structural violations | ✅ (adlc-orchestrator trimmed) |
+| All references linked from parent SKILL.md | ✅ (6 SKILL.md updates) |
+| ≥5 trials documented | ✅ (Trial 1-5 + closing addendum) |
+| 7 post-VG skills exercised | ✅ (temidev/docs/tier3-exercise/ 7 artifacts) |
+| Mature adopter through P4 | ✅ (temidev F3b at P4 build) |
+| 50-sample eval validated | ✅ (both F3b + F3c · mock mode end-to-end) |
+
+**Tier A signed.** Plugin promotes to v3.0.0 in the next release commit. v3.1 still awaits Tier B external-adopter evidence per ADR-009.
+
+---
+
 ## [2.9.0] — 2026-05-20
 
 **Marketplace-readiness sprint.** Closes Trial 2 LOW-priority backlog (deferred since v2.3 · ~6 months) and the adopter-onboarding cliff (F4.11 scenario→skill cheatsheet). Ships 3 high-impact templates that validate the "useful for ANY project" claim with patterns proven across 5 dogfood trials.

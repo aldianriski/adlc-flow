@@ -84,4 +84,9 @@ Execution procedure: `references/procedure.md`.
 - ADR files are append-only — never edit past ADRs in place; supersede with a new ADR.
 - Detect convention before writing: scan `docs/adr/` AND `docs/DECISIONS.md`. Choose per the rule in the header. Create `docs/adr/` if neither exists.
 
+## References
+
+- `references/procedure.md` — full ADR write procedure
+- `references/adr-amendment-pattern.md` — inline `## ADR-NNN § Amendment YYYY-MM-DD` shape for evolving decisions (Trial 5 F8.12)
+
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).

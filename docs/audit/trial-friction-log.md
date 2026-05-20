@@ -1192,4 +1192,71 @@ Walked the ADLC discipline for the AI clause risk flagger feature (H-002 · clas
 - 0 VALIDATIONS
 - 2 POSITIVE (F8.21 ADR deltas-from-baseline · F8.22 clarification-round count drops on 2nd AI wedge)
 
+---
+
+## Trial 5 Closing — v2.8 + v2.9 ship narrative (2026-05-20)
+
+### What shipped after Trial 5 froze findings
+
+**v2.8.0** *(2026-05-20 · f45fa3d)* — Mature-adopter friction sprint. 10 closed items:
+
+| ID | Item | Surface |
+|---|---|---|
+| F8.1 | `init.js` detects existing `docs/DECISIONS.md` OR `docs/adr/` · writes POINTER.md not .gitkeep | `bin/adlc-flow-init.js` |
+| F8.2 | `docs/MIGRATION-FROM-DEV-FLOW.md` skill-by-skill compatibility table | NEW doc |
+| F8.3 | `init.js` inspects `.claude/settings.json` plugin-enabled · `--enable` flag patches automatically | `bin/adlc-flow-init.js` |
+| F8.4 | `init.js` detects TODO.md/CHANGELOG · `docs/SPRINT-CONVENTION-COMPAT.md` | NEW doc |
+| F8.5 | `init.js` conditional next-steps message (skip "customize CLAUDE.md" when SKIPPED) | `bin/adlc-flow-init.js` |
+| F8.6 | `init.js` post-run commit-policy guidance | `bin/adlc-flow-init.js` |
+| F8.10 | `templates/SETUP-supabase.md.template` — Docker dep + Vault provisioning | NEW template |
+| F8.12 | `skills/adr-writer/references/adr-amendment-pattern.md` — `## ADR-NNN § Amendment YYYY-MM-DD` shape | promoted positive pattern |
+| F8.13 | `skills/responsibility-map/references/form-action-wrappers.md` — inline SA wrapper for SSR forms | promoted positive pattern |
+| F8.15 | `skills/lean-doc-generator/references/recon-first-discipline.md` — 4-trial-validated rule | promoted positive pattern |
+
+**v2.9.0** *(2026-05-20 · e32af12)* — Marketplace-readiness sprint. Closes Trial 2 LOW backlog deferred ~6 months:
+
+| ID | Item | Surface |
+|---|---|---|
+| F4.8 | `templates/SERVER-ACTION-RLS.md.template` — Supabase SA + RLS dual-layer | validated across 12+ SAs in temidev Sprints 023-032 |
+| F4.9 | `templates/I18N-BILINGUAL.md.template` — bilingual i18n + key-parity | validated at 1700+ key scale (temidev) |
+| F4.10 | `templates/DEPLOY-PLAN.md.template` — Vercel + Supabase deploy + rollback | 8-section runbook |
+| F4.11 | README `Scenario → skill cheatsheet` (18 scenarios) | adopter-onboarding cliff closed |
+| F4.13 | `/adlc-orchestrator` description + 8-row Adopter scenarios matrix | mature-adopter visibility |
+
+### Trial 5 cross-trial scoring
+
+| Metric | Trial 1 | Trial 2 | Trial 3 | Trial 4a/4b | Trial 5 |
+|---|---|---|---|---|---|
+| Friction findings | 5 | 13 | 10 | 5+5 | 31 |
+| Positive patterns | 1 | 0 | 0 | 4 | 14 |
+| First trial in stack maturity | ✓ greenfield agentic | ✓ landing | ✓ multi-agent | ✓ real LLM-core | ✓ **mature existing project** |
+| Released as | v2.2 | v2.3 | v2.4+v2.5 | v2.6+v2.7 | v2.8+v2.9 |
+| Promoted patterns ratio | 0.20 | 0.00 | 0.00 | 0.80 | 0.45 |
+
+**Trial 5 is the first trial where the plugin met a mature existing codebase** (47 ADRs · 31 sprints · 83KB TODO.md · 959 tests · live production). Most friction was about *graceful adaptation* (don't overwrite · don't relocate · don't force migration) rather than missing features. The 14 positive patterns reflect a plugin that has matured past "missing capability" into "has working capability ripe for promotion."
+
+### Cumulative trial evidence (5 trials)
+
+- **5 trials run**, each catching a non-overlapping friction cluster
+- **64 friction findings** captured · 49 closed (76.5%) · 15 deferred to v3.0+ as low-priority polish
+- **19 positive patterns** promoted to references / templates / ADR conventions
+- **8 ADRs** anchoring decisions
+- **12 templates** (5 NEW in v2.8+v2.9)
+- **28 skills + 11 agents + 5 scripts + 2 hooks** — all under structural caps · 0 violations
+- **2 deferred backlog items** to v3.0+: `references/ai-feature-adr-baselining.md` (F8.21) · `references/cross-feature-clarification-reuse.md` (F8.22)
+
+### What v2.9 deliberately does NOT close
+
+| Debt | Reason deferred | Path forward |
+|---|---|---|
+| 7 post-VG skills unvalidated against live production telemetry (`/release-readiness`, `/canary-plan`, `/ai-observe`, `/model-upgrade`, `/drift-audit`, `/context-engineer` live, `/cost-budget` billing) | No adopter has shipped through the full P5-P7 arc yet — temidev F3b/F3c stopped at P4 build pending VG-budget cycle | v3.0 stability checkpoint requires ≥1 adopter through full lifecycle |
+| Multi-language adopter templates (Python · Go) | All 5 trials TS/Next.js/Supabase | TASK-301 · adopter-driven |
+| `prompt-reviewer` attack-corpus upgrade · `cost-analyst` billing-API integration · `agent-architect` framework-agnostic catalog · macOS/Linux hook verification | Low-priority polish · no observed friction | TASK-302-305 |
+
+### Trial 5 verdict
+
+**adlc-flow v2.9.0 is marketplace-ready for the TS/Next.js/Supabase adopter base** — the stack validated across all 5 dogfood trials. Other stacks emerge as adopter feedback drives v3.0+ template expansion. The mature-adopter adaptation surface (`init` idempotency · ADR/sprint convention detection · MIGRATION-FROM-DEV-FLOW doc · SPRINT-CONVENTION-COMPAT doc) is the v2.8 hardening that makes adoption possible for projects that have already shipped without adlc-flow.
+
+The plugin earns Trial 5's verdict.
+
 

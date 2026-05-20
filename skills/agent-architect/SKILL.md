@@ -72,4 +72,9 @@ ADR MUST name the sub-variant chosen and cite why it beat the others for THIS fe
 ❌ **Pattern chosen because team is familiar with framework X** — framework is a *tactic*, pattern is a *strategy*; don't conflate
 ❌ **No fallback path if agent fails** — every pattern must have a documented graceful-degradation route
 
+## References
+
+- `references/prompt-caching-pattern.md` — 3-cache-block prompt architecture (Trial 4b F7.6)
+- `references/single-call-planner.md` — single-call planner with `tool_use` (Trial 4b F7.7)
+
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).

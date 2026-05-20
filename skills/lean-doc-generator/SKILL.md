@@ -85,5 +85,6 @@ Commit strategy: `sprint(NNN): plan locked` at promote · `sprint(NNN): <summary
 - `references/DOCS_Guide.md` — full standard: Core Files, line limits, templates, anti-patterns, pre-delivery checklist
 - `references/SPRINT_PROTOCOLS.md` — sprint promote/execute/close protocols
 - `references/FLOW_GRILL.md` — batched Q&A discipline for planning convergence
+- `references/recon-first-discipline.md` — recon-first sprint planning (4-trial-validated · 50-85% scope reduction)
 
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).
