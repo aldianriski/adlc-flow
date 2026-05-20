@@ -9,7 +9,7 @@
     {
       "name": "adlc-flow",
       "description": "Unified phase-gated workflow scaffold for modern software development — both traditional code AND agentic products (LLM-core agents, RAG systems, multi-agent workflows). Implements EPAM's ADLC + universal dev workflow. Successor to dev-flow (v4.x frozen).",
-      "version": "2.8.0",
+      "version": "2.9.0",
       "source": {
         "source": "github",
         "repo": "aldianriski/adlc-flow"

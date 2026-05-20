@@ -23,6 +23,17 @@ status: current
 - ~~TASK-011 — First commit + push to `aldianriski/adlc-flow` remote~~ ✓ shipped 2026-05-20 (initial commit 7d19820 · v2.7.0 · 98 files · master tracks origin/master)
 - TASK-103 — Marketplace publish (GitHub repo now public + non-empty · marketplace.json validated by Claude Code marketplace)
 
+### P1 — v2.9.0 (SHIPPED 2026-05-20 · Marketplace readiness)
+- ~~F4.8 — Server Action + RLS template (Supabase pattern · deferred since Trial 2 v2.3)~~ ✓ `templates/SERVER-ACTION-RLS.md.template`
+- ~~F4.9 — i18n bilingual content-object template (deferred since Trial 2)~~ ✓ `templates/I18N-BILINGUAL.md.template`
+- ~~F4.10 — Deploy-plan template (Vercel + Supabase · deferred since Trial 2)~~ ✓ `templates/DEPLOY-PLAN.md.template`
+- ~~F4.11 — Scenario → skill chain cheatsheet (adopter onboarding cliff · deferred since Trial 2)~~ ✓ `README.md` "Scenario → skill chain cheatsheet" section · 18 scenarios
+- ~~F4.13 — `/adlc-orchestrator` "existing-project" path explicit in description~~ ✓ SKILL.md v1.1.0 → v1.2.0 · NEW "Adopter scenarios" 9-row matrix
+- ~~README polish for marketplace listing~~ ✓ Complete rewrite · adopter-facing first-impression-ready
+
+### P0 — Marketplace
+- TASK-103 — Submit marketplace.json to Claude Code marketplace (single `gh` API call OR manual submission · all blockers cleared in v2.9.0)
+
 ### P1 — v2.8.0 (SHIPPED 2026-05-20 · Trial 5)
 - ~~F8.1 — `init.js` detects existing `docs/DECISIONS.md` (single-file ADR) or `docs/adr/` with content; writes POINTER.md not .gitkeep~~ ✓
 - ~~F8.2 — `docs/MIGRATION-FROM-DEV-FLOW.md` for dev-flow → adlc-flow migration guide~~ ✓

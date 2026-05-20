@@ -1,0 +1,225 @@
+# Bilingual i18n content-object pattern
+
+Filed per Trial 2 finding F4.9 · validated extensively at temidev (Sprints 020-032 ·
+EN ↔ ID parity enforced across 1700+ keys). Drop this into your project at
+`docs/patterns/i18n-bilingual.md` and adapt to your locale set + framework.
+
+The pattern is framework-agnostic conceptually but the examples use next-intl
+(temidev's choice). Equivalent shapes exist for react-intl · i18next · vue-i18n.
+
+## The pattern in one paragraph
+
+For projects targeting two or more locales, treat translations as STRUCTURED CONTENT
+OBJECTS not flat key-value maps. Enforce parity via an automated test that fails
+the build when one locale gets a key the other doesn't. Default to the primary
+locale via routing config · let users opt to the secondary via a `LocaleToggle`
+component writing `NEXT_LOCALE` cookie. Render with the standard `t(key)` for
+direct substitution · use `t.raw(key) as string` ONLY when downstream `.replace()`
+substitution happens (per ADR-047 in temidev).
+
+## File structure
+
+```
+messages/
+├── en.json   # English (primary or secondary depending on routing.defaultLocale)
+└── id.json   # Indonesian (primary or secondary depending on routing.defaultLocale)
+```
+
+`messages/en.json` shape (deeply-nested object · NOT flat keys):
+
+```json
+{
+  "auth": {
+    "login": { "title": "Sign in", "email_label": "Email", "submit": "Sign in" }
+  },
+  "admin": {
+    "dashboard": { "page_title": "Dashboard", "page_subtitle": "Overview" },
+    "agreements": { "...": "..." }
+  },
+  "portal": {
+    "shell": { "nav_dashboard": "Dashboard", "nav_timeline": "Timeline" }
+  }
+}
+```
+
+Each locale file MUST mirror the structure. Adding a key to `en.json` without
+adding it to `id.json` MUST fail CI (see Parity test below).
+
+## Routing config (next-intl example)
+
+`i18n/routing.ts`:
+
+```typescript
+import { defineRouting } from "next-intl/routing";
+
+export const routing = defineRouting({
+  locales: ["en", "id"],
+  defaultLocale: "id",  // Indonesian-primary per ADR-048 (temidev)
+  localePrefix: "never", // URL stays /portal (cookie drives locale · not /id/portal)
+});
+```
+
+`i18n/request.ts`:
+
+```typescript
+import { getRequestConfig } from "next-intl/server";
+import { cookies } from "next/headers";
+import { routing } from "./routing";
+
+export default getRequestConfig(async () => {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
+  const locale = routing.locales.includes(cookieLocale as "en" | "id")
+    ? (cookieLocale as "en" | "id")
+    : routing.defaultLocale;
+  return {
+    locale,
+    messages: (await import(`../messages/${locale}.json`)).default,
+  };
+});
+```
+
+## LocaleToggle component
+
+```tsx
+"use client";
+
+import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+
+const LOCALES = [
+  { code: "id", label: "Indonesia", flag: "/flag_id.svg" },
+  { code: "en", label: "English", flag: "/flag_en.svg" },
+  // ⚠ Order matters: LOCALES[0] is the defensive fallback when useLocale()
+  // returns a code not in this list. Keep aligned with routing.defaultLocale.
+] as const;
+
+export function LocaleToggle() {
+  const currentLocale = useLocale();
+  const router = useRouter();
+
+  const switchLocale = (code: string) => {
+    if (code === currentLocale) return;
+    const secure = location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `NEXT_LOCALE=${code}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+    router.refresh();
+  };
+
+  return (
+    <div>
+      {LOCALES.map((l) => (
+        <button key={l.code} onClick={() => switchLocale(l.code)} aria-current={l.code === currentLocale}>
+          {l.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+## Parity test (the safety net · CRITICAL)
+
+`tests/unit/i18n/key-parity.test.ts`:
+
+```typescript
+import { describe, it, expect } from "vitest";
+import en from "@/messages/en.json";
+import id from "@/messages/id.json";
+
+function collectKeyPaths(obj: unknown, prefix = ""): string[] {
+  if (obj === null || typeof obj !== "object" || Array.isArray(obj)) {
+    return prefix ? [prefix] : [];
+  }
+  const paths: string[] = [];
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    paths.push(...collectKeyPaths(value, path));
+  }
+  return paths;
+}
+
+function getValueAtPath(root: unknown, path: string): unknown {
+  return path.split(".").reduce<unknown>((acc, segment) => {
+    if (acc && typeof acc === "object" && !Array.isArray(acc)) {
+      return (acc as Record<string, unknown>)[segment];
+    }
+    return undefined;
+  }, root);
+}
+
+describe("messages/en.json ↔ messages/id.json — global key parity", () => {
+  const enPaths = collectKeyPaths(en).sort();
+  const idPaths = collectKeyPaths(id).sort();
+
+  it("every EN key path resolves to non-empty string in ID", () => {
+    for (const path of enPaths) {
+      const v = getValueAtPath(id, path);
+      expect(typeof v === "string" && v.trim().length > 0, `Missing/empty in ID: ${path}`).toBe(true);
+    }
+  });
+
+  it("every ID key path resolves to non-empty string in EN", () => {
+    for (const path of idPaths) {
+      const v = getValueAtPath(en, path);
+      expect(typeof v === "string" && v.trim().length > 0, `Missing/empty in EN: ${path}`).toBe(true);
+    }
+  });
+
+  it("EN and ID share the same leaf key-path set", () => {
+    expect(idPaths).toEqual(enPaths);
+  });
+
+  it("non-trivial coverage — both files have ≥100 leaf keys", () => {
+    expect(enPaths.length).toBeGreaterThanOrEqual(100);
+    expect(idPaths.length).toBeGreaterThanOrEqual(100);
+  });
+});
+```
+
+This test is the SAFETY NET. Run on every CI build. Without it, drift accumulates
+silently (Trial 5 F2 made the ID-default flip risk-free precisely because this
+test was in place since Sprint 026).
+
+## Deferred-substitution pattern (per temidev ADR-047)
+
+When a placeholder-bearing string is hydrated server-side but the substitution
+value is derived later (e.g. in a client component with state), use
+`t.raw(key) as string` instead of `t(key)`:
+
+```typescript
+// ❌ Wrong — next-intl emits "MISSING_MESSAGE / Variable {first_name} not found"
+const greeting = t("welcome");  // value: "Hi, {first_name}!"
+
+// ✅ Right — defer substitution
+const greetingTemplate = t.raw("welcome") as string;
+const greeting = greetingTemplate.replace("{first_name}", firstName);
+```
+
+When the substitution value IS available at the hydration site, use the native
+`t(key, values)` overload — that's the canonical path.
+
+```typescript
+const greeting = t("welcome", { first_name: firstName });  // canonical
+```
+
+## Anti-patterns
+
+- ❌ Flat `messages/en.flat.json` with dotted keys (`"admin.dashboard.title"`)
+  · breaks structural diff · harder to find drift
+- ❌ Sharing JSON files between locales (e.g. `messages/common.json` for both)
+  · the parity test can't validate · drift becomes invisible
+- ❌ Hardcoding strings in components ("Sign in" inline) · circumvents the
+  parity guarantee
+- ❌ Concatenating strings client-side to build sentences · breaks word-order
+  semantics in non-English languages
+- ❌ Using auto-translation (Google Translate) for new strings without native-
+  speaker review · ID/JP/AR/etc. have register/formality issues machine
+  translation misses
+
+## Cross-references
+
+- Trial 2 F4.9 — original filing (Sprint 010 / v2.3 era)
+- Trial 5 F2 (ADR-048 temidev) — Indonesian-primary i18n flip validated
+- Trial 5 F8.18 — temidev's 1700+ key parity discipline validated at scale
+- temidev ADR-047 — `t.raw()` deferred-interpolation pattern
+- temidev `tests/unit/i18n/key-parity.test.ts` — canonical implementation

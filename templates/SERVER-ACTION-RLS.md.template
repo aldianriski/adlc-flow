@@ -1,0 +1,243 @@
+# Server Action + RLS pattern (Supabase adopter template)
+
+Filed per Trial 2 finding F4.8 · validated across temidev (12+ SAs · Sprints 023-032).
+Drop this into your project at `docs/patterns/server-action-rls.md` and customize
+the per-feature names. The pattern is the same; only the table/SA names change.
+
+## The pattern
+
+For typed mutations against Supabase with RLS as the auth layer (per ADR-029
+in temidev · or your equivalent), the canonical shape is:
+
+```
+"use server"
+   ↓
+Zod input schema (lib/validations/<feature>.ts)
+   ↓
+Server Action (lib/actions/<feature>.ts)
+  1. Parse → typed input (Zod)
+  2. Role-guard (auth.getUser + app_metadata.role check)
+  3. Load existing row (RLS-trusted)
+  4. Validate lifecycle transition (if applicable)
+  5. Mutate via authenticated client (RLS dual-layer)
+  6. Audit emit via admin client (NO PII in payload)
+  7. Return typed result {data?, error?, fieldErrors?}
+```
+
+## Boilerplate
+
+### 1. Zod input schema
+
+`lib/validations/<feature>.ts`:
+
+```typescript
+import { z } from "zod";
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const createFooSchema = z.object({
+  parent_id: z.string().regex(UUID_REGEX, "invalid_uuid"),
+  title: z.string().min(3, "title_too_short").max(200, "title_too_long"),
+  // ... fields specific to your domain
+}).superRefine((data, ctx) => {
+  // Cross-field invariants here (mirror DB CHECK constraints)
+});
+
+export type CreateFooInput = z.infer<typeof createFooSchema>;
+```
+
+### 2. Server Action
+
+`lib/actions/<feature>.ts`:
+
+```typescript
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createFooSchema, type CreateFooInput } from "@/lib/validations/<feature>";
+
+export type FooErrorCode =
+  | "unauthorized"
+  | "permission_denied"
+  | "validation"
+  | "not_found"
+  | "invalid_transition"
+  | "unexpected";
+
+export interface FooMutationResult {
+  data?: { id: string; idempotent_noop?: boolean };
+  error?: FooErrorCode;
+  fieldErrors?: Record<string, string[]>;
+}
+
+async function requireRole(roles: string[]) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "unauthorized" as const };
+  const role = (user.app_metadata?.role as string | undefined) ?? "";
+  if (!roles.includes(role)) return { error: "permission_denied" as const };
+  return { supabase, userId: user.id };
+}
+
+async function emitAudit(actorId: string, action: string, payload: Record<string, unknown>): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    await admin.from("audit_logs").insert({
+      actor_id: actorId,
+      action,
+      resource_type: "<feature>",
+      resource_id: payload.foo_id ?? null,
+      metadata: payload, // ⚠ NO PII per privacy posture
+    });
+  } catch (err) {
+    console.warn("[<feature>] audit emission failed:", (err as Error).message);
+  }
+}
+
+export async function createFoo(rawInput: unknown): Promise<FooMutationResult> {
+  // 1. Parse + validate
+  const parsed = createFooSchema.safeParse(rawInput);
+  if (!parsed.success) {
+    return {
+      error: "validation",
+      fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
+  }
+  const input: CreateFooInput = parsed.data;
+
+  // 2. Role-guard
+  const auth = await requireRole(["admin", "legal"]);
+  if ("error" in auth) return { error: auth.error };
+  const { supabase, userId } = auth;
+
+  // 3-5. Mutate via authenticated client (RLS enforces row-level visibility)
+  const { data: row, error: insertError } = await supabase
+    .from("foos")
+    .insert({
+      parent_id: input.parent_id,
+      title: input.title,
+      created_by: userId,
+      status: "draft" as const,
+    })
+    .select("id, parent_id, created_at")
+    .maybeSingle();
+
+  if (insertError || !row) {
+    console.error("[createFoo] insert failed:", insertError);
+    return { error: "unexpected" };
+  }
+
+  // 6. Audit emit (no PII)
+  await emitAudit(userId, "foo_created", {
+    foo_id: row.id,
+    parent_id: row.parent_id,
+    status_to: "draft",
+    transitioned_at: row.created_at,
+  });
+
+  // 7. Return typed result
+  return { data: { id: row.id } };
+}
+```
+
+### 3. Migration with RLS dual-layer
+
+`supabase/migrations/<timestamp>_foos.sql`:
+
+```sql
+CREATE TABLE IF NOT EXISTS public.foos (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  parent_id   uuid NOT NULL REFERENCES public.parents(id) ON DELETE CASCADE,
+  title       text NOT NULL,
+  status      text NOT NULL DEFAULT 'draft'
+                CHECK (status IN ('draft', 'sent', 'signed', 'voided')),
+  created_by  uuid NOT NULL REFERENCES public.profiles(id),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  -- DB CHECK invariants (defense in depth · Zod superRefine mirrors)
+  CONSTRAINT foos_signed_shape_chk CHECK (
+    status <> 'signed' OR signed_at IS NOT NULL
+  )
+);
+
+COMMENT ON TABLE public.foos IS '...';
+
+ALTER TABLE public.foos ENABLE ROW LEVEL SECURITY;
+
+-- Multi-role select (admin/legal/ops see all)
+CREATE POLICY "foos_select_admin_legal_ops"
+  ON public.foos FOR SELECT TO authenticated
+  USING (public.get_my_role() IN ('admin', 'legal', 'ops'));
+
+-- Client sees only own (per parent relationship)
+CREATE POLICY "foos_select_client_own"
+  ON public.foos FOR SELECT TO authenticated
+  USING (
+    public.get_my_role() = 'client'
+    AND parent_id IN (SELECT id FROM public.parents WHERE client_id = auth.uid())
+  );
+
+-- Restricted INSERT
+CREATE POLICY "foos_insert_admin_legal"
+  ON public.foos FOR INSERT TO authenticated
+  WITH CHECK (
+    public.get_my_role() IN ('admin', 'legal')
+    AND created_by = auth.uid()  -- self-reference enforced
+  );
+
+-- Restricted UPDATE
+CREATE POLICY "foos_update_admin_legal"
+  ON public.foos FOR UPDATE TO authenticated
+  USING (public.get_my_role() IN ('admin', 'legal'))
+  WITH CHECK (public.get_my_role() IN ('admin', 'legal'));
+
+-- NO DELETE policy → use voided status instead (soft-delete)
+```
+
+### 4. Test file (vitest)
+
+`tests/unit/actions/<feature>.test.ts`:
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createFoo } from "@/lib/actions/<feature>";
+
+vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
+
+// Helper to build mock Supabase clients (see temidev sprint 032 tests for full helper)
+function buildSupabaseClient(opts: { user?: { id: string; app_metadata: { role: string } } | null; insertResult?: any }) {
+  // ... mock query builder ...
+}
+
+describe("createFoo", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("happy path · admin role · audit emitted", async () => { /* ... */ });
+  it("rejects unauthenticated with 'unauthorized'", async () => { /* ... */ });
+  it("rejects client role with 'permission_denied'", async () => { /* ... */ });
+  it("rejects empty/invalid input with 'validation' + fieldErrors", async () => { /* ... */ });
+  it("audit payload omits PII", async () => { /* ... */ });
+});
+```
+
+## Anti-patterns (DO NOT do)
+
+- ❌ Client-side fetch to RLS-protected tables · always go through Server Actions
+- ❌ Using service-role key client-side · `createAdminClient()` is server-only
+- ❌ Bypassing the role-guard at the SA layer "because RLS will catch it" · dual-layer is the contract
+- ❌ Logging PII in audit_logs · audit payload structure is invariant: `{ resource_id, status_to, transitioned_at, ... }` with NO names/emails/phones
+- ❌ DELETE on audit_logs · the audit table is INSERT-only by RLS · never UPDATE either
+- ❌ `select("*")` on user-facing surfaces · always name columns to prevent accidental admin-column leak
+
+## Cross-references
+
+- ADR-029 (temidev) — RLS as auth layer · this template's foundational decision
+- ADR-049 (temidev) — multi-role RLS pattern · 4 distinct policies for 3 role tiers
+- Trial 2 F4.8 — original filing of this gap
+- Trial 5 Sprint 032 T2 commit `88ccb7a` — 4 SAs validated end-to-end with 22 vitest cases
+- `skills/responsibility-map/references/form-action-wrappers.md` — bridging this typed SA surface to Next.js form-action shape

@@ -1,0 +1,172 @@
+# Deploy plan template
+
+Filed per Trial 2 finding F4.10. Drop this into your project at
+`docs/DEPLOY-PLAN.md` and customize for your hosting target.
+
+Template covers Vercel + Supabase + Anthropic API (the validated TS/Next.js
+adopter stack from temidev). Adapt the sections for other targets (Cloudflare
+Pages · Netlify · Fly.io · self-hosted) — the discipline transfers.
+
+---
+
+## 1. Production environment matrix
+
+| Env | URL | Branch | Supabase project | Anthropic API key env | Vault keys |
+|---|---|---|---|---|---|
+| **production** | `https://yourapp.com` | `main` | `prod-<slug>` | `ANTHROPIC_API_KEY` (prod) | `SUPABASE_VAULT_*_ID` (prod UUIDs) |
+| **staging** | `https://staging.yourapp.com` | `staging` | `staging-<slug>` | `ANTHROPIC_API_KEY` (staging) | `SUPABASE_VAULT_*_ID` (staging UUIDs) |
+| **preview** | `https://<pr-N>.yourapp-pr.vercel.app` | per-PR | shared with staging | shared with staging | shared with staging |
+
+⚠ Preview envs share Supabase + Anthropic with staging by default. If you need
+isolated preview DBs, use Supabase branches (Phase 2 trigger when team grows).
+
+## 2. Vercel project configuration
+
+### Initial setup
+1. Create project in Vercel dashboard linked to GitHub repo
+2. Framework preset: `Next.js`
+3. Root directory: `/` (or your monorepo subpath)
+4. Build command: `pnpm build` (or your equivalent)
+5. Output directory: `.next` (Next.js default)
+
+### Environment variables (Settings → Environment Variables)
+
+| Variable | Scope | Source | Notes |
+|---|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Production + Preview | Supabase project URL | Public · safe to expose |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Production + Preview | Supabase anon key | Public · RLS protects |
+| `SUPABASE_SERVICE_ROLE_KEY` | Production + Preview ⚠ | Supabase service role | **NEVER** put in `NEXT_PUBLIC_*` |
+| `ANTHROPIC_API_KEY` | Production + Preview | Anthropic console | Server-only · NEVER prefix `NEXT_PUBLIC_` |
+| `SUPABASE_VAULT_<DOMAIN>_KEY_ID` | Production + Preview | Provisioned per ADR-044 / 049 | UUID of Vault secret · NOT the secret itself |
+| `RATE_LIMIT_IP_SALT` | Production + Preview | Random 32-char hex | For IP-hash anonymization (Sprint 023 pattern) |
+| `<FEATURE>_ENABLED` | Production + Preview | `true` after VG passes | Global kill-switch · default false on first deploy |
+
+⚠ `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS. NEVER expose to client bundle.
+Always import `createAdminClient()` from `lib/supabase/admin.ts` (server-only)
+when service-role privilege is needed.
+
+### Custom domain
+1. Add domain in Settings → Domains
+2. Configure DNS A/CNAME per Vercel instructions
+3. Wait for SSL cert provisioning (~2-5 min)
+4. Test redirects from `www.` to apex (or vice versa)
+
+## 3. Supabase project configuration
+
+### Initial setup
+1. Create Supabase project at https://supabase.com/dashboard
+2. Note the project URL + anon key + service role key
+3. Enable Row Level Security on every table by default
+4. Set up Auth providers (email · OAuth as needed)
+
+### Vault secrets provisioning (for AI feature encryption)
+Per `templates/SETUP-supabase.md.template`. Single key per encryption domain:
+```bash
+openssl rand -hex 32  # → 64 hex chars
+```
+1. Supabase Dashboard → Settings → Vault → New Secret
+2. Name: descriptive (`agreement_signer_key` · `gcal_token_key`)
+3. Paste hex value · copy UUID
+4. Add UUID to Vercel env vars as `SUPABASE_VAULT_<DOMAIN>_KEY_ID`
+
+### Migration push workflow
+
+```bash
+# Local: stage migration in supabase/migrations/<timestamp>_<slug>.sql
+# Test idempotency:
+supabase db reset --linked=false   # if Docker available
+supabase db push --dry-run
+
+# Push to remote at sprint close (deferred batch · per ADR-046 amendment):
+supabase db push --include-all
+supabase migration list   # verify zero local-only rows
+```
+
+## 4. Pre-launch checklist
+
+### Code-side
+- [ ] `pnpm type-check` clean
+- [ ] `pnpm lint` clean
+- [ ] `pnpm test` green (unit + integration)
+- [ ] `pnpm test:e2e` green (Playwright · or your E2E suite)
+- [ ] Security scan: `/security-review` skill session (or equivalent)
+- [ ] All canonical artifacts up-to-date (HYPOTHESIS · RESPONSIBILITY-MAP · COST-BUDGET · etc.)
+
+### Infrastructure
+- [ ] Custom domain DNS configured + SSL cert active
+- [ ] All env vars set in Vercel (Production + Preview scopes)
+- [ ] Supabase RLS policies reviewed (no missing policies on user-facing tables)
+- [ ] All migrations pushed to remote (`supabase migration list` shows zero drift)
+- [ ] Vault keys provisioned for any encrypted-at-rest columns
+- [ ] Rate-limit salt rotated from any committed default
+- [ ] CORS allowlist matches the production domain
+
+### Feature flags (per `/responsibility-map` kill-switch convention)
+- [ ] All `<FEATURE>_ENABLED` env vars default to `false` on first deploy
+- [ ] Enable after VG passes per feature
+- [ ] Document the enable/disable runbook (≤30s recovery for incidents)
+
+### Observability
+- [ ] `/ai-observe` skill output emitted to logs (or your observability sink)
+- [ ] Cost-budget alerts wired to your channel (Slack · email · PagerDuty)
+- [ ] Audit log RLS lets ops/admin read agent-emitted events
+- [ ] Error monitoring active (Sentry · Vercel Analytics · etc.)
+
+### Backup + restore
+- [ ] Supabase project backup schedule confirmed (default: daily)
+- [ ] Restore process documented (test on staging at least once before launch)
+- [ ] Rollback plan: how to revert a bad deploy (Vercel "Promote previous" + DB migration DOWN)
+
+## 5. Launch sequence
+
+```
+T-7 days:  Pre-launch checklist run · staging deploy + smoke test
+T-3 days:  /security-review session · address findings · re-run smoke
+T-1 day:   Final staging deploy mirrors prod · take backup snapshot
+T-0:       Production deploy
+T+15min:   /canary-plan abort criteria check · roll back if any tripped
+T+1h:      Verify all observability counters healthy · cost-budget alerts armed
+T+24h:     First operational review · check audit logs · cost actuals vs estimates
+T+7d:      First /drift-audit run (baseline) · /pov-gate re-run if golden dataset updated
+```
+
+## 6. Rollback runbook
+
+### Code-only rollback (no DB change)
+1. Vercel dashboard → Deployments → previous green deploy → "Promote to Production"
+2. ~30 seconds to propagate
+3. Update FEEDBACK-LOG.md with rollback reason
+
+### DB migration rollback
+1. Verify DOWN path in the migration's header docblock
+2. `supabase db reset --linked=false` locally to validate DOWN cleanly
+3. Generate inverse migration (`supabase migration new revert_<slug>`)
+4. Push inverse migration
+5. Then code-rollback per above
+
+### Feature-flag-only rollback (PREFERRED · ~30s)
+1. Set `<FEATURE>_ENABLED=false` in Vercel env vars
+2. Redeploy current production (no code change · just env var refresh)
+3. Document in FEEDBACK-LOG · investigate offline
+
+Feature-flag rollback is the safest path · always design new features to be
+disablable without code revert.
+
+## 7. Post-launch SLA targets (customize)
+
+| Metric | Target | Source | Alert at |
+|---|---|---|---|
+| P95 page load | < 2s | Vercel Analytics | > 3s for 15 min |
+| API error rate | < 1% | Sentry · Vercel Logs | > 5% for 5 min |
+| Database p95 query | < 200ms | Supabase dashboard | > 500ms for 10 min |
+| Cost per AI call (per feature) | per COST-BUDGET.md | observability sink | > p95 × 1.5 |
+| Audit log write success | > 99.9% | audit_logs INSERT count | < 99% over 1h |
+
+## 8. Cross-references
+
+- Trial 2 F4.10 — original filing of this gap
+- `templates/SETUP-supabase.md.template` — Supabase tooling expectations
+- `skills/canary-plan/SKILL.md` — controlled rollout designer (P6 skill)
+- `skills/release-readiness/SKILL.md` — RG sign-off doc generator
+- `skills/ai-observe/SKILL.md` — observability schema generator
+- Vercel docs · Supabase docs (link to your specific versions)

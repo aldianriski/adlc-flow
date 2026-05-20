@@ -4,6 +4,43 @@ All notable changes to `adlc-flow` are documented here. Format: [Keep a Changelo
 
 ---
 
+## [2.9.0] — 2026-05-20
+
+**Marketplace-readiness sprint.** Closes Trial 2 LOW-priority backlog (deferred since v2.3 · ~6 months) and the adopter-onboarding cliff (F4.11 scenario→skill cheatsheet). Ships 3 high-impact templates that validate the "useful for ANY project" claim with patterns proven across 5 dogfood trials.
+
+### Added
+
+- **`README.md` complete rewrite** — adopter-facing (not dev-facing). Scenario → skill cheatsheet (F4.11) with 18 common scenarios + their canonical skill chain. Updated status section reflecting v2.9.0 + 5-trial evidence base + v3.0 stability checkpoint criterion.
+
+- **`templates/SERVER-ACTION-RLS.md.template`** — Supabase Server Action + RLS dual-layer pattern (F4.8 · deferred since Trial 2 v2.3 era). Boilerplate covers Zod schema · role-guard · audit emission · RLS policies (multi-role) · DB CHECK invariants · vitest test shape. Validated across 12+ SAs in temidev Sprints 023-032.
+
+- **`templates/I18N-BILINGUAL.md.template`** — Bilingual i18n content-object pattern + key-parity discipline (F4.9 · deferred since Trial 2). Covers next-intl routing config · LocaleToggle component · the critical key-parity test (the safety net) · `t.raw()` deferred-substitution pattern from ADR-047. Validated at temidev's 1700+ key scale.
+
+- **`templates/DEPLOY-PLAN.md.template`** — Production deploy + rollback runbook (F4.10 · deferred since Trial 2). 8-section template: env matrix · Vercel config · Supabase config · Vault provisioning · pre-launch checklist · launch sequence · rollback runbook · SLA targets. Vercel + Supabase + Anthropic stack baseline · adaptable to other targets.
+
+### Changed
+
+- **`/adlc-orchestrator` SKILL.md v1.1.0 → v1.2.0** — Description rewritten to explicitly surface "works for ANY project shape" + new "Adopter scenarios" section (F4.13 · deferred since Trial 2). 9-row scenario matrix covering greenfield agentic · greenfield traditional · mature existing (with/without dev-flow) · multi-track · existing ADR convention · existing sprint protocol · Supabase + AI · bilingual · production-ready.
+
+### Marketplace readiness
+
+- README is now adopter-facing first-impression-ready
+- Scenario→skill cheatsheet closes the onboarding cliff (Trial 2 F4.11)
+- 12 templates available (4 new in v2.9 · 1 new in v2.8 · 7 from prior versions)
+- All Tier 2 Trial-2-LOW items closed (F4.8 · F4.9 · F4.10 · F4.13 · F4.11)
+- Pending: TASK-103 marketplace submission (manual `gh` action when ready)
+
+### Honest scope
+
+v2.9 closes the pre-marketplace "useful for any project" debt. It does NOT close:
+- Tier 3 ADLC arc validation gap (7 post-VG skills unvalidated against live data) — addressed by v3.0 stability checkpoint when an adopter ships through full lifecycle
+- Multi-language adopter templates (Python · Go) — TASK-301 carry-forward
+- prompt-reviewer attack-corpus upgrade · cost-analyst billing-API integration — TASK-302/303
+
+These remain as v3.0+ candidates. The plugin is now marketplace-ready for the TS/Next.js/Supabase adopter base which is the validated stack.
+
+---
+
 ## [2.8.0] — 2026-05-20
 
 **Trial 5 (temidev mature-adopter dogfood) fixes + pattern promotion.** Closes 6 MEDIUM/LOW friction items surfaced during the first end-to-end ADLC walkthrough on a mature pre-existing codebase (temidev · 31 closed sprints · 49 ADRs in single-file convention · 83KB TODO.md · 247KB CHANGELOG). Promotes 3 positive patterns (ADR amendment shape · inline form-action wrappers · recon-first discipline). Full trial signal in [`docs/audit/trial-friction-log.md` § Trial 5](docs/audit/trial-friction-log.md). Trial produced 31 distinct items across 14 commits over 5 phases (Phase 0 adoption · F2 ID-default i18n · F3a workflow agreement · F3b SoW drafter ADLC arc 5/6 gates · F3c clause risk flagger ADLC arc 5/6 gates · F4+F5 sidebar polish).
