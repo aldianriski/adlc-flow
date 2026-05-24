@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead (Aldian Rizki)
-last_updated: 2026-05-20
+last_updated: 2026-05-24
 update_trigger: New trial dogfood completes; new findings to capture
 status: current
 purpose: Multi-trial friction log for adlc-flow. Trial 1 (ticket triage v2.1→v2.2); Trial 2 (naraly landing v2.2→v2.3).
@@ -1258,5 +1258,71 @@ Walked the ADLC discipline for the AI clause risk flagger feature (H-002 · clas
 **adlc-flow v2.9.0 is marketplace-ready for the TS/Next.js/Supabase adopter base** — the stack validated across all 5 dogfood trials. Other stacks emerge as adopter feedback drives v3.0+ template expansion. The mature-adopter adaptation surface (`init` idempotency · ADR/sprint convention detection · MIGRATION-FROM-DEV-FLOW doc · SPRINT-CONVENTION-COMPAT doc) is the v2.8 hardening that makes adoption possible for projects that have already shipped without adlc-flow.
 
 The plugin earns Trial 5's verdict.
+
+---
+
+# Trial 6 — umkm-indo H-001 PoV-build resume (2026-05-24 · v3.0.0 → v3.1 candidate)
+
+**Trial repo:** `D:\Project\umkm-indo`
+**Product:** H-001 AI landing-page generator (amended wedge — business-description → published BI landing page)
+**Scope:** Resume the umkm-indo line (Trials 4a/4b were pre-code) at the **PoV-build → VG** boundary. First dogfood run against **shipped v3.0.0**; first attempt at the post-VG arc that Tier B requires.
+**Subject under test:** the orchestrator's ability to *resume* a parked trial cleanly + the `--amend` cascade's downstream-debt handling.
+
+---
+
+## Phase 3 — prove (resume) — orientation only, no new phase run yet
+
+### What I did
+
+Oriented in umkm-indo from a (cross-repo) adlc-flow session before launching a native run. Read `.claude/CLAUDE.md`, `HYPOTHESIS.md`, `poc/README.md`, `EVAL-SUITE/storefront-from-csv/PLAN.md`, `GOLDEN-DATASET/storefront-from-csv/v1/README.md`. Goal: locate exactly where the trial parked and what the next gate needs. Orientation alone surfaced a blocking finding before any phase ran.
+
+### Findings
+
+- **F9.1 — Hypothesis amendment left the eval triad stranded; `--amend` flags downstream debt but nothing tracks it to closure** *(HIGH · the headline finding)*
+  - H-001 was amended 2026-05-20 (full-storefront-from-CSV → **landing-page-from-business-description**; CSV demoted to optional secondary input). But the **golden dataset, EVAL-SUITE/PLAN, and the `poc/` pipeline are all still the pre-amendment shape**: CSV-row inputs · per-product category/compliance/carryover outputs · metrics = listing-carryover + per-product word-edit. The amended hypothesis measures theme-keep rate + per-section copy survival + business-attribute hallucination — a *different input, output, and metric set*.
+  - Consequence: `/pov-gate` cannot validate the current H-001 — the golden dataset benchmarks the abandoned feature. 4/4 golden samples are product rows; **zero** business-description samples exist.
+  - The `--amend` cascade (F7.1, v2.7) **did** flag this (HYPOTHESIS.md VG-verdict note: "golden-dataset focus shifts … existing schema needs adjustment per F-101 follow-on task") — so the *detection* worked. The gap is that the flag is **prose in one file** with no tracked, blocking task; the trial sat parked on silent debt with three artifacts contradicting the hypothesis and nothing failing loudly.
+  - **Fix (adlc-flow):** `/hypothesis-register --amend` should emit a **tracked blocking item** (e.g. a `[STALE-ARTIFACT]` row in TODO/HYPOTHESIS with the specific artifacts + the shape-delta) rather than a prose aside. Cascade-scan should classify each downstream artifact as `compatible` / `needs-reshape` and refuse a clean exit while any `needs-reshape` is open.
+
+- **F9.2 — `/pov-gate` has no hypothesis↔golden-dataset shape guard** *(MEDIUM · defense-in-depth for F9.1)*
+  - `/pov-gate` already halts on `INSUFFICIENT_SAMPLES`. It has no equivalent halt for *semantic* mismatch — it would happily score a landing-page hypothesis against a product-CSV dataset and emit a verdict that looks valid but measures the wrong thing.
+  - **Fix (adlc-flow):** add a pre-flight check — compare the hypothesis's declared input/output/metric vocabulary against the golden-dataset schema; halt with `HYPOTHESIS_DATASET_MISMATCH` (name the diverging fields) before scoring. Cheap, deterministic, and would have caught F9.1 at the gate even if `--amend` hadn't.
+
+- **F9.3 — `--amend` cascade detection fired correctly** *(POSITIVE · validates F7.1)*
+  - Credit where due: the v2.7 amend cascade did identify the golden-dataset as needing adjustment at amend time. The weakness (F9.1) is *follow-through tracking*, not *detection*. F7.1 works as designed.
+
+### Phase 3-resume findings tally
+
+- 2 NEW FRICTION (F9.1 HIGH · F9.2 MEDIUM)
+- 1 POSITIVE (F9.3 — `--amend` detection validated)
+- **Trial status:** PARKED at P3 — `/pov-gate` is blocked until the eval triad is realigned to the amended H-001 (a $0 mock/scaffold task). Live-PoV (real cost) comes after realignment.
+- **Resume handoff:** `D:\Project\umkm-indo\RESUME-HERE.md` (written this session for the native run).
+
+---
+
+## Phase 4 — build (platform skeleton · traditional-dev surface)
+
+### What I did
+
+User pivoted the session: rather than the agentic eval realignment (still parked per F9.1), build out the **platform skeleton** — the multi-tenant ecommerce shell the landing-page wedge lives inside. Ran from the adlc-flow session as a deliberate two-sided dogfood (build umkm-indo + watch the plugin). Traditional-dev mode (no HG/VG gates). Scaffolded ~22 files in `umkm-indo/apps/web`: middleware + Supabase admin client, DB migration (profiles · tenants · landing_pages + ownership RLS), marketing/auth/dashboard route groups + nav, publish server action with human-pre-approval gate, public `/s/[slug]` storefront. `tsc --noEmit` clean.
+
+### Findings
+
+- **F9.4 — `SERVER-ACTION-RLS` template is RBAC-shaped; ownership-based SaaS needs a variant** *(MEDIUM)*
+  - The template (validated on temidev, a back-office legal app) hard-assumes: (a) **Zod** as a dependency, (b) a `createClient` export name, (c) an **RBAC** model — `requireRole(["admin","legal"])` + `get_my_role()` + `app_metadata.role`. umkm-indo is self-serve multi-tenant SaaS: auth is **ownership** (`owner_id = auth.uid()`), there are no roles, and it doesn't depend on zod (server.ts exports `createSupabaseServerClient`).
+  - The *reusable* core is the SA shape (parse → guard → load → mutate → audit → return). The role model is the non-transferable part. I adapted by hand and noted it inline in `lib/actions/auth.ts`.
+  - **Fix (adlc-flow):** ship an **ownership-based variant** of the template (RLS `using (owner_id = auth.uid())` + public-read-published), and label the two auth shapes explicitly (RBAC back-office vs ownership SaaS). Make the Zod dependency optional/called-out, not assumed.
+
+- **F9.5 — `SETUP-supabase` migration conventions + mock-first transferred cleanly** *(POSITIVE)*
+  - The header-docblock (Purpose/Tables/DOWN/DATA) + `IF NOT EXISTS` + `COMMENT ON TABLE` migration convention applied directly and made the migration self-documenting. The "author-for-later / mock without live DB" guidance (mock-first-pov reference) is exactly what let the skeleton typecheck + render in skeleton mode with no Supabase project. Both v2.8/v2.9 templates earned their keep on a *different* domain than they were filed against — cross-domain validation.
+
+- **F9.6 — adopter built a whole platform shell without reaching for `/adlc-orchestrator` traditional mode** *(OBSERVATION · worth a look)*
+  - For a multi-module traditional-dev scaffold, the natural flow was just "design + build directly," not invoking the orchestrator. The orchestrator's `traditional` mode + scope-analyst (ADR-007) is meant for exactly this, but nothing pulled me toward it. Question for adlc-flow: is traditional-mode discoverability too low, or is direct-build genuinely fine for skeleton work and the orchestrator only earns its cost on risk/blast-radius? No fix yet — flagging for the next traditional-dev trial to confirm.
+
+### Phase 4 build tally
+
+- 2 NEW FRICTION (F9.4 MEDIUM template-shape · earlier F9.x agentic-side)
+- 2 POSITIVE/OBSERVATION (F9.5 cross-domain template validation · F9.6 orchestrator discoverability question)
+- **Build status:** platform skeleton complete + typechecks. Auth/persist activate when Supabase env is set ("author for later"). Publish flow gated on explicit seller approval per RESPONSIBILITY-MAP.
 
 

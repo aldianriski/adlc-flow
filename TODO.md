@@ -1,107 +1,39 @@
 ---
 owner: Tech Lead (Aldian Rizki)
-last_updated: 2026-05-20
+last_updated: 2026-05-24
 update_trigger: Sprint promote / close / task add
 status: current
 ---
 
 # TODO.md — adlc-flow
 
-> Active Sprint pointer at top. Closed-sprint detail lives in [`CHANGELOG.md`](CHANGELOG.md).
+> Active Sprint pointer at top. **Backlog = open items only** — shipped work lives in [`CHANGELOG.md`](CHANGELOG.md) + the Roadmap below.
 
 ---
 
 ## Active Sprint
 
-`— none — (v3.0.0 SHIPPED · Tier A · push to origin pending user action)`
+`— none — (v3.0.0 SHIPPED + PUSHED + TAGGED + RELEASED @ 43ce903 · Tier A. Next milestone = v3.1 Tier B external-adopter evidence — see TASK-101.)`
 
 ---
 
 ## Backlog
 
-### P0 — Pending user action
-- ~~TASK-011 — First commit + push to `aldianriski/adlc-flow` remote~~ ✓ shipped 2026-05-20 (initial commit 7d19820 · v2.7.0 · 98 files · master tracks origin/master)
-- **TASK-103 — Push origin/master + announce v3.0.0** (8 local commits ahead of origin: v2.7→v2.10→v3.0 + Trial 5 audits; marketplace.json @ 3.0.0)
-- TASK-104 — README status banner refresh ("v3.0.0 · Tier A internal-evidence validated · adopting external feedback toward v3.1")
-
-### P0 — v3.0.0 (SHIPPED 2026-05-20 · stability checkpoint · Tier A internal-evidence)
-- ~~Bump 2.10.0 → 3.0.0 · plugin.json + marketplace.json + CHANGELOG~~ ✓
-- ~~README banner update (Tier A · earned v3.0 status)~~ pending TASK-104
-
-### P1 — v2.10.0 (SHIPPED 2026-05-20 · v3.0 Tier A readiness sprint)
-- ~~Phase A — plugin completeness audit (1 violation fixed + 6 orphan references linked + Trial 5 closing addendum)~~ ✓
-- ~~Phase B — eval rigor (SoW 10→50 samples · clause-risk NEW 50 samples · mock-mode pipeline validated end-to-end: SoW 45/50 · CR 36/50)~~ ✓
-- ~~Phase C — Tier 3 ADLC arc exercise (7 post-VG skills against temidev F3b · 10 debt items surfaced for v3.1+)~~ ✓
-- ~~ADR-009 — two-tier v3.0 readiness criterion (Tier A internal · Tier B external)~~ ✓
-- ~~Bump 2.9.0 → 2.10.0 · CHANGELOG entry · README banner update~~ ✓
-
-### P1 — v2.9.0 (SHIPPED 2026-05-20 · Marketplace readiness)
-- ~~F4.8 — Server Action + RLS template (Supabase pattern · deferred since Trial 2 v2.3)~~ ✓ `templates/SERVER-ACTION-RLS.md.template`
-- ~~F4.9 — i18n bilingual content-object template (deferred since Trial 2)~~ ✓ `templates/I18N-BILINGUAL.md.template`
-- ~~F4.10 — Deploy-plan template (Vercel + Supabase · deferred since Trial 2)~~ ✓ `templates/DEPLOY-PLAN.md.template`
-- ~~F4.11 — Scenario → skill chain cheatsheet (adopter onboarding cliff · deferred since Trial 2)~~ ✓ `README.md` "Scenario → skill chain cheatsheet" section · 18 scenarios
-- ~~F4.13 — `/adlc-orchestrator` "existing-project" path explicit in description~~ ✓ SKILL.md v1.1.0 → v1.2.0 · NEW "Adopter scenarios" 9-row matrix
-- ~~README polish for marketplace listing~~ ✓ Complete rewrite · adopter-facing first-impression-ready
-
 ### P0 — Marketplace
-- TASK-103 — Submit marketplace.json to Claude Code marketplace (single `gh` API call OR manual submission · all blockers cleared in v2.9.0)
+- TASK-103 — Submit `marketplace.json` to the Claude Code marketplace (single `gh` API call OR manual submission · all blockers cleared in v2.9.0 · outward-facing, needs user go-ahead).
 
-### P1 — v2.8.0 (SHIPPED 2026-05-20 · Trial 5)
-- ~~F8.1 — `init.js` detects existing `docs/DECISIONS.md` (single-file ADR) or `docs/adr/` with content; writes POINTER.md not .gitkeep~~ ✓
-- ~~F8.2 — `docs/MIGRATION-FROM-DEV-FLOW.md` for dev-flow → adlc-flow migration guide~~ ✓
-- ~~F8.3 — `init.js` inspects `.claude/settings.json` plugin-enabled state · `--enable` flag patches automatically~~ ✓
-- ~~F8.4 — `init.js` detects TODO.md / CHANGELOG · compat note + `docs/SPRINT-CONVENTION-COMPAT.md`~~ ✓
-- ~~F8.5 — `init.js` conditional next-steps message (skip "customize CLAUDE.md" when file SKIPPED)~~ ✓
-- ~~F8.6 — `init.js` post-run commit-policy guidance for adopter artifacts~~ ✓
-- ~~F8.10 — `templates/SETUP-supabase.md.template` for Docker dependency + Vault provisioning~~ ✓
-- ~~F8.12 — `skills/adr-writer/references/adr-amendment-pattern.md` (ADR § Amendment shape)~~ ✓
-- ~~F8.13 — `skills/responsibility-map/references/form-action-wrappers.md` (inline SA wrapper pattern)~~ ✓
-- ~~F8.15 — `skills/lean-doc-generator/references/recon-first-discipline.md` (4-trial-validated rule)~~ ✓
+### P1 — External validation (the v3.1 Tier B gate)
+- TASK-101 — Real LLM-core feature dogfood through the **full P0–P7 arc**. Pre-code phases COMPLETE 2026-05-20 via umkm-indo trial (init → discover → design → prove-prep · 5 findings captured · 2 closed in v2.6.0 · 3 patterns promoted v2.7+). **Remaining**: PoV-build onward — P4 build · P5 validate/RG · P6 activate · P7 operate/MG. Continues at `D:\Project\umkm-indo\`, OR via a separate third-party-adopter recruitment. This is the single gate between v3.0 (Tier A) and v3.1 (Tier B). **BLOCKED (2026-05-24)**: eval triad (golden-dataset · EVAL-SUITE · `poc/`) is stale vs the amended H-001 (landing-page-from-description) — must realign before VG. Resume briefing at `umkm-indo/RESUME-HERE.md`; dogfood finding = Trial 6 / F9.1–F9.3.
 
-### P1 — v2.6.0 (SHIPPED 2026-05-20)
-- ~~TASK-601 — `templates/HYPOTHESIS.md.template` missing `Type` column~~ ✓ Type column added to summary table header + placeholder row + reference line of Type values + detail-block field
-- ~~TASK-602 — `/hypothesis-register` multi-agent kill-criteria prompt chicken-and-egg fix~~ ✓ hypothesis-register v1.4.0 accepts `defer to AG` answer with placeholder · agent-architect v1.4.0 HALTs ADR write on `[DEFER-TO-AG]` until amendment
-
-### P1 — v2.7.0 (SHIPPED 2026-05-20 · Trial 4b)
-- ~~TASK-701 — `/hypothesis-register --amend H-NNN` mode for hypothesis-amendment cascade (F7.1)~~ ✓ v1.5.0 · 6-artifact cascade-scan · amendment-history line · no-silent-soften rule
-- ~~TASK-702 — `docs/references/script-from-nextjs.md` reference doc (F7.2)~~ ✓ Recipe for server-only + cross-env + NODE_OPTIONS=--conditions=react-server when running CLI scripts from a Next.js project
-- ~~F7.3 — CLAUDE.md.template stack-freshness hint~~ ✓ one-line note added to Stack section
-- ~~F7.4 — non-ADLC skill integration points~~ ✓ `skills/adlc-orchestrator/references/non-adlc-skill-integration.md` documents recommended hand-off points per phase
-- ~~F7.5 — mock-first PoV scaffold pattern~~ ✓ promoted to `skills/golden-dataset/references/mock-first-pov.md` (third cross-trial validation)
-- ~~F7.6 — 3-cache-blocks prompt-caching pattern~~ ✓ `skills/agent-architect/references/prompt-caching-pattern.md`
-- ~~F7.7 — single-call planner with tool_use~~ ✓ `skills/agent-architect/references/single-call-planner.md` with worked example from umkm-indo
-- ~~F7.8 — preview-gate + cost-banner UX~~ ✓ `skills/responsibility-map/references/preview-gate-ux.md`
-
-### P0 — v2.4.0 (SHIPPED 2026-05-20)
-- ~~TASK-401 — F5.1: `/agent-architect` tie-break rule when short trajectory + multi-domain~~ ✓ v1.2.0
-- ~~TASK-402 — F5.2: optional per-agent eval subfiles when ≥3 agents~~ ✓ `/eval-suite-planner` v1.2.0
-- ~~TASK-403 — F5.3: RESPONSIBILITY-MAP Chain column / sequence-numbered rows~~ ✓ template updated
-- ~~TASK-404 — F5.4: `/hypothesis-register --type=agentic` prompts for multi-agent kill-criteria~~ ✓ v1.3.0
-- ~~TASK-405 — F5.7: RESPONSIBILITY-MAP cross-agent context-handoff policy section~~ ✓ template updated
-- ~~TASK-406 — ADR-008 anchors multi-agent template adjustments cluster~~ ✓ written
-- ~~TASK-407 — Bump v2.4.0 · CHANGELOG entry · structural eval pass~~ ✓ 28 skills · 11 agents · 0 violations
-
-### P1 — Next-session candidates (non-trial)
-- ~~TASK-202 — Behavioral acceptance harness~~ ✓ shipped 2026-05-20 (`scripts/eval-acceptance.js` + 8 representative prompts at `tests/skill-triggering/prompts/`. DRY RUN is default ($0); `--live` opts into spawning claude CLI per dev-flow ADR-021 Mode A. Pass rule: ≥2/3 quorum on `"name":"Skill"` AND target match. Bonus: surfaced + fixed gitignore over-reach that would have excluded trial-friction-log + graphify-out from first commit)
-- ~~TASK-203 — `scripts/audit-baseline.js` Node port~~ ✓ shipped 2026-05-20 (28 skills · 11 agents · 8 ADRs · 8 templates · 4 scripts measured; outputs `docs/audit/baseline-metrics.{md,json}`; tracks rigid/flexible split + version + ADR table + template table beyond dev-flow's port; exits 1 on cap violations for CI use)
-- ~~TASK-204 — Document graphify MCP server setup recipe in README/CLAUDE.md~~ ✓ shipped 2026-05-20 (README "Graphify install" section: uv-tool install + backend choice table + extract/update/cluster-only cost distinction + small-corpus reduction honesty · validated end-to-end against live graph: query · explain · path)
-- ~~TASK-205 — Wire SessionStart hook to optionally auto-run graphify update when stale~~ ✓ shipped 2026-05-20 (`ADLC_GRAPHIFY_AUTO_UPDATE=1` triggers AST-only `graphify update .` when graph older than `ADLC_GRAPHIFY_STALE_DAYS` (default 7); explicitly does NOT auto-run full-cost `graphify extract` per cost-safety. PATH detection + 120s timeout + graceful failure)
-
-### P2 — v2.5.0 (SHIPPED 2026-05-20)
-- ~~TASK-501 — F5.5: `/pov-gate` mitigation-plan structure~~ ✓ pov-gate v1.2.0 verdict template requires per-finding triplet (finding · proposed fix · re-eval acceptance criterion)
-- ~~TASK-502 — F5.6: `/pov-gate` headroom callout~~ ✓ emits warning line for any metric within 10% of kill threshold, above the recommendation
-- ~~TASK-503 — F5.8: `/agent-architect` multi-agent sub-variants~~ ✓ agent-architect v1.3.0 distinguishes orchestrator-worker / peer-network / hierarchical with fit + coordination cost; ADR must name sub-variant
-- ~~TASK-504 — F5.9: RESPONSIBILITY-MAP per-agent kill-switch~~ ✓ template Kill-switch section adds Per-agent row (multi-agent only, <30s operator disable, fallback to human/peer)
-
-### P1 — External validation
-- TASK-101 — Real LLM-core feature dogfood. **Pre-code phases COMPLETE 2026-05-20** via umkm-indo trial (init → discover → design → prove-prep) — 5 findings captured, 2 closed in v2.6.0, 3 positive patterns flagged for v2.7+ formalization. **Remaining**: full lifecycle from PoV-build onward (P4 build · P5 validate/RG · P6 activate · P7 operate/MG). Continues at `D:\Project\umkm-indo\`. Gates v2.x → v3.0 still pending the build-through-operate arc. Could be umkm-indo itself, OR could be a separate third-party-adopter recruitment.
-
-### P2 — v2.1+ improvements
-- TASK-301 — Multi-language adopter templates (Python project structure, Go project structure)
-- TASK-302 — `prompt-reviewer` upgrade: structured PoC scoring against a frozen attack corpus
-- TASK-303 — `cost-analyst` integration with provider billing APIs (read-only; OpenLLMetry/Helicone adapter)
-- TASK-304 — `agent-architect`: framework-agnostic pattern catalog reference (LangChain / LangGraph / CrewAI / Autogen as adapter targets)
-- TASK-305 — Verify Node hooks on macOS/Linux in practice (current Node implementation is portable; just needs platform-test)
+### P2 — v3.1+ candidates
+- TASK-301 — Multi-language adopter templates (Python project structure · Go project structure).
+- TASK-302 — `prompt-reviewer` upgrade: structured PoC scoring against a frozen attack corpus.
+- TASK-303 — `cost-analyst` integration with provider billing APIs (read-only · OpenLLMetry/Helicone adapter).
+- TASK-304 — `agent-architect`: framework-agnostic pattern catalog reference (LangChain / LangGraph / CrewAI / Autogen as adapter targets).
+- TASK-305 — Verify Node hooks on macOS/Linux in practice (current impl is portable · needs platform-test).
+- TASK-306 — Guided-tour / onboarding-walkthrough emitter built on the graphify graph (god-nodes = entry points · communities = chapters). Idea lifted from the 2026-05-24 Understand-Anything evaluation (see memory `understand-anything-eval`). v1 navigational-only (zero-cost) · opt-in `--enrich` for LLM prose. **Build only when recruiting an external adopter (TASK-101) — adopter-onboarding de-risk, not speculative feature work.**
+- TASK-307 — `/hypothesis-register --amend` should emit a **tracked blocking item** for stale downstream artifacts (classify each as `compatible`/`needs-reshape`; refuse clean exit while any `needs-reshape` is open) instead of a prose note. From Trial 6 / F9.1 (umkm-indo amendment-drift — eval triad stranded by a hypothesis pivot, nothing tracked it).
+- TASK-308 — `/pov-gate` pre-flight **hypothesis↔golden-dataset shape guard**: halt with `HYPOTHESIS_DATASET_MISMATCH` when the hypothesis's input/output/metric vocabulary diverges from the dataset schema (parallel to the existing `INSUFFICIENT_SAMPLES` halt). From Trial 6 / F9.2.
 
 ---
 
@@ -137,9 +69,9 @@ Detail in [`CHANGELOG.md`](CHANGELOG.md). One-line ribbon, most recent first:
 - **v2.8.0** *(shipped 2026-05-20)* — Trial 5 mature-adopter fixes (10 items · `init.js` rewrite · MIGRATION + SPRINT-CONVENTION-COMPAT docs · 3 promoted references).
 - **v2.9.0** *(shipped 2026-05-20)* — Marketplace-readiness sprint. Trial 2 LOW backlog closed (F4.8-F4.13 · 3 high-impact templates + scenario cheatsheet). Adopter-onboarding cliff fixed.
 - **v2.10.0** *(shipped 2026-05-20)* — **v3.0 Tier A readiness sprint** per ADR-009. 1 structural violation fixed · 6 orphan-reference links added · Trial 5 closing addendum · golden datasets expanded to 50 samples · mock-mode eval validated end-to-end · 7 Tier 3 skills exercised against real adopter data. Tier A criteria all signed.
-- **v3.0.0** *(shipped 2026-05-20)* — **v3.0 stability checkpoint (Tier A · internal-evidence validated)** per ADR-009. Cumulative result of v0.1 → v3.0 arc: 28 skills · 11 agents · 12 templates · 9 ADRs · 5 dogfood trials · 0 structural violations. Tier B external-adopter evidence becomes the v3.1.0 gate.
+- **v3.0.0** *(shipped 2026-05-20)* — **v3.0 stability checkpoint (Tier A · internal-evidence validated)** per ADR-009. Cumulative result of v0.1 → v3.0 arc: 28 skills · 11 agents · 12 templates · 9 ADRs · 5 dogfood trials · 0 structural violations. Tier B external-adopter evidence becomes the v3.1.0 gate. Tagged + GitHub Release published 2026-05-24.
 - **v3.1.0** *(future)* — Tier B external-adopter validation: ≥1 external adopter through full P0-P7 arc · live billing reconciliation · 1 quarterly /drift-audit on live data.
-- **v3.x+** *(future)* — F6.3 cost-kill marketing · F6.4 clarification-flow reference · multi-language adopter templates · prompt-reviewer attack-corpus · cost-analyst billing-API.
+- **v3.x+** *(future)* — F6.3 cost-kill marketing · F6.4 clarification-flow reference · multi-language adopter templates · prompt-reviewer attack-corpus · cost-analyst billing-API · TASK-306 guided-tour emitter.
 
 ---
 
