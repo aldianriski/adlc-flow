@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead (Aldian Rizki)
-last_updated: 2026-05-20
+last_updated: 2026-05-29
 update_trigger: ADR status change OR v3.0 release criteria revised
 status: decided
 ---
@@ -39,7 +39,9 @@ Issued when ALL of:
 - ≥1 mature adopter (≥30 sprints + ≥40 ADRs + ≥50 KLOC) successfully adopted at `init` and shipped through P4 build
 - Eval pipeline validated end-to-end at 50-sample scale in mock mode for ≥1 adopter feature
 
-### Tier B — External-evidence v3.1+ (post-marketplace)
+> **Amendment (2026-05-29):** v4.0.0 shipped a breaking skill rename (`/adlc-orchestrator` → `/orchestrator`, see ADR-010), which consumed the major version. The Tier-B external-adopter gate below is therefore **v4.1.0**, not the originally-planned v3.1.0 — the criteria are unchanged, only the version number moved.
+
+### Tier B — External-evidence v4.1+ (post-marketplace)
 
 Issued when ALL of:
 - ≥1 EXTERNAL adopter (not the maintainer's project) ships through full P0-P7 arc using adlc-flow
@@ -60,7 +62,7 @@ Tier A is achievable internally; Tier B requires the marketplace adoption cycle.
 | Mature adopter through P4 | temidev: 47 ADRs · 32 closed sprints · ~959 tests · F3b at P4 build · 11 commits this cycle |
 | 50-sample eval validated | `temidev/EVAL-SUITE/{sow-drafter,clause-risk-flagger}/runs/2026-05-20T08-*-mock` |
 
-## Tier B unblockers (when do we promote to v3.1?)
+## Tier B unblockers (when do we promote to v4.1?)
 
 Each item below would substantively contribute to Tier B evidence — collected as a checklist for marketplace launch:
 
@@ -74,7 +76,7 @@ Each item below would substantively contribute to Tier B evidence — collected 
 - [ ] External adopter runs /model-upgrade on first model bump
 - [ ] Live billing reconciliation within ±15% of cost-budget projection (any adopter)
 
-When ≥3 unblockers are met, plugin promotes to v3.1.0 with the evidence basis cited.
+When ≥3 unblockers are met, plugin promotes to v4.1.0 with the evidence basis cited.
 
 ## Consequences
 
@@ -83,19 +85,19 @@ When ≥3 unblockers are met, plugin promotes to v3.1.0 with the evidence basis 
 - v3.0 is achievable in the current release cycle without speculative claims
 - Tier A criterion is verifiable: every line item has a file path or audit report
 - Tier B framing makes the marketplace launch visible as the next phase, not a blocking dependency
-- Honest signal to adopters: "v3.0 = ready for adoption · v3.1 = adoption evidence shipped"
+- Honest signal to adopters: "v3.0 = ready for adoption · v4.1 = adoption evidence shipped"
 
 ### Negative
 
 - "v3.0" semantics differ from the original TODO.md framing (was strictly external)
-- Adopters may expect Tier B evidence at v3.0 and find it deferred to v3.1
+- Adopters may expect Tier B evidence at v3.0 and find it deferred to v4.1
 - The two-tier framing adds documentation surface (this ADR + README + CHANGELOG must agree)
 
 ### Mitigation
 
 - README banner at v3.0 release explicitly says "Tier A internal-evidence validated · Tier B external adopter cycle begins now"
 - TODO.md "External validation" section keeps tracking Tier B unblockers
-- v3.1.0 release earns its number by meeting ≥3 Tier B unblockers
+- v4.1.0 release earns its number by meeting ≥3 Tier B unblockers
 
 ## Alternatives considered
 
@@ -104,7 +106,7 @@ When ≥3 unblockers are met, plugin promotes to v3.1.0 with the evidence basis 
 3. **Internal-only v3.0 without explicit criteria** — bump silently. Rejected: same anti-pattern as 2; just less obvious.
 4. **Bump to v2.10.0 only and indefinitely defer v3.0** — keeps original criterion intact. Rejected: same as 1.
 
-The two-tier approach was selected because it accomplishes both (a) a meaningful release-criterion checkpoint internally, AND (b) preserves the external-adopter criterion as a v3.1 gate.
+The two-tier approach was selected because it accomplishes both (a) a meaningful release-criterion checkpoint internally, AND (b) preserves the external-adopter criterion as a v4.1 gate.
 
 ## Related
 
