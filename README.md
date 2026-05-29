@@ -18,9 +18,9 @@ claude plugin add adlc-flow
 node ~/.claude/plugins/adlc-flow/bin/adlc-flow-init.js --enable
 
 # 3. Start the lifecycle
-/adlc-orchestrator init                           # if you skipped step 2
-/adlc-orchestrator discover "<business pain>"     # agentic feature
-/adlc-orchestrator traditional                    # non-agentic work
+/orchestrator init                           # if you skipped step 2
+/orchestrator discover "<business pain>"     # agentic feature
+/orchestrator traditional                    # non-agentic work
 ```
 
 For mature existing projects, `init` detects your existing `docs/DECISIONS.md` / `docs/adr/` / `TODO.md` / `CHANGELOG.md` and preserves them. It scaffolds only what's missing. See `init`'s output for the detected conventions + commit policy.
@@ -35,8 +35,8 @@ For mature existing projects, `init` detects your existing `docs/DECISIONS.md` /
 
 | Scenario | Skill chain |
 |---|---|
-| **I want to build an agentic feature (LLM-core)** | `/adlc-orchestrator discover "pain"` → `/hypothesis-register` (HG) → `/responsibility-map` (SG) → `/agent-architect` (AG · with ADR) → `/eval-suite-planner` → `/golden-dataset` → build mock-first → `/pov-gate` (VG · hard go/no-go) |
-| **I want to ship a traditional feature (landing · API · ops tool)** | `/adlc-orchestrator traditional` → `/lean-doc-generator` (sprint plan) → `/tdd` + `/test-planner` → code-reviewer agent → `/release-patch` or `/release-manager` |
+| **I want to build an agentic feature (LLM-core)** | `/orchestrator discover "pain"` → `/hypothesis-register` (HG) → `/responsibility-map` (SG) → `/agent-architect` (AG · with ADR) → `/eval-suite-planner` → `/golden-dataset` → build mock-first → `/pov-gate` (VG · hard go/no-go) |
+| **I want to ship a traditional feature (landing · API · ops tool)** | `/orchestrator traditional` → `/lean-doc-generator` (sprint plan) → `/tdd` + `/test-planner` → code-reviewer agent → `/release-patch` or `/release-manager` |
 | **I have a hard-to-reverse decision to document** | `/adr-writer` — auto-detects existing convention (`docs/DECISIONS.md` single-file OR `docs/adr/<NNN>.md` multi-file) |
 | **I need to understand an unfamiliar module** | `/zoom-out <module>` — semantic + structural map via graphify |
 | **I need to debug a production bug** | `/diagnose` — 6-phase systematic debug (reproduce · isolate · hypothesize · verify · fix · prevent) |
@@ -55,7 +55,7 @@ For mature existing projects, `init` detects your existing `docs/DECISIONS.md` /
 | **Phased rollout planning** | `/canary-plan` — controlled-rollout designer with abort triggers + rollback |
 | **Release-readiness sign-off** | `/release-readiness` — 8-section RG-gate sign-off doc |
 
-> Don't memorize this. Just run `/adlc-orchestrator <task description>` and the dispatcher routes to the right entry point.
+> Don't memorize this. Just run `/orchestrator <task description>` and the dispatcher routes to the right entry point.
 
 ---
 
@@ -93,7 +93,7 @@ For traditional (non-agentic) work, the lifecycle simplifies to `init → tradit
 ## Skills (28 total · 14 ADLC + 14 universal)
 
 ### ADLC-native (14)
-`/adlc-orchestrator` · `/hypothesis-register` · `/responsibility-map` · `/agent-architect` · `/eval-suite-planner` · `/golden-dataset` · `/pov-gate` · `/context-engineer` · `/release-readiness` · `/canary-plan` · `/ai-observe` · `/model-upgrade` · `/drift-audit` · `/cost-budget`
+`/orchestrator` · `/hypothesis-register` · `/responsibility-map` · `/agent-architect` · `/eval-suite-planner` · `/golden-dataset` · `/pov-gate` · `/context-engineer` · `/release-readiness` · `/canary-plan` · `/ai-observe` · `/model-upgrade` · `/drift-audit` · `/cost-budget`
 
 ### Universal dev workflow (14 · absorbed from dev-flow per ADR-004)
 `/prime` · `/zoom-out` · `/graph-query` · `/pr-reviewer` · `/security-auditor` · `/refactor-advisor` · `/diagnose` · `/tdd` · `/test-planner` · `/lean-doc-generator` · `/adr-writer` · `/release-manager` · `/release-patch` · `/write-a-skill`
@@ -149,13 +149,15 @@ uv tool install "graphifyy[mcp] --with anthropic"   # Anthropic Claude (highest 
 graphify install                        # Linux/Mac
 graphify install --platform windows     # Windows
 
-# Build the graph for THIS repo (full LLM cost · skip if you only use non-graphify skills):
-graphify .
+# Build the graph for THIS repo — two billing paths:
+/graphify .                             # RECOMMENDED · skill: semantic pass runs on your Claude Code subscription (no API key)
+graphify .                              # external CLI: uses the backend API key picked above (metered $) or Ollama ($0)
 ```
 
 ### Cost vs free commands
 
-- `graphify .` / `graphify extract .` — **full LLM cost**. Use after major refactors or first-time.
+- `/graphify .` (skill) — semantic pass on your **Claude Code subscription**, no API key. **Preferred** for first-time / post-refactor rebuilds. `/graphify . --update` = cheap incremental (code-only changes = $0).
+- `graphify .` / `graphify extract .` (external CLI) — **full LLM cost on the backend API key** above (or $0 with Ollama). Use after major refactors or first-time.
 - `graphify update .` — **$0**. Re-extracts AST only; semantic results cached. Use after code-only changes.
 - `graphify cluster-only .` — **$0**. Regenerates `GRAPH_REPORT.md` + `graph.html` from existing `graph.json`.
 
@@ -173,7 +175,7 @@ Graphify is opt-in per project · re-evaluate per project, not blindly.
 
 ## Migrating from dev-flow
 
-dev-flow v4.x keeps working — no urgent migration needed. Most skill names carry over verbatim (`/prime` · `/lean-doc-generator` · `/adr-writer` · `/pr-reviewer` · `/tdd` etc.). One renamed: `/orchestrator` → `/adlc-orchestrator`.
+dev-flow v4.x keeps working — no urgent migration needed. Most skill names carry over verbatim (`/prime` · `/lean-doc-generator` · `/adr-writer` · `/pr-reviewer` · `/tdd` etc.). One renamed: `/orchestrator` → `/orchestrator`.
 
 Full migration guide: [`docs/MIGRATION-FROM-DEV-FLOW.md`](docs/MIGRATION-FROM-DEV-FLOW.md). ADR-004 captures the absorption decision.
 

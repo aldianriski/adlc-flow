@@ -27,7 +27,7 @@ Eight prompts spanning the agentic + traditional + orientation paths:
 | Prompt | Tests |
 |---|---|
 | `prime.txt` | Session-start orientation routing |
-| `adlc-orchestrator.txt` | Sprint/phase dispatch from cold start |
+| `orchestrator.txt` | Sprint/phase dispatch from cold start |
 | `hypothesis-register.txt` | Kill-criteria pre-commitment for an agentic feature |
 | `agent-architect.txt` | Pattern choice routing (ReAct vs multi-agent vs hybrid) |
 | `responsibility-map.txt` | Human-agent decision-grid build |

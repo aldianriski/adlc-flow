@@ -28,7 +28,7 @@ For module-map orientation use `/zoom-out` instead — same backend, different r
 # Adopter project setup (one-time)
 pip install graphifyy           # or: uv tool install graphifyy
 graphify install                # registers /graphify in Claude Code
-graphify .                      # build the graph (outputs to graphify-out/)
+/graphify .                     # build the graph via the skill (subscription · no API key)
 ```
 
 Optional: `pip install "graphifyy[mcp]"` to enable MCP stdio server (queries become programmatic).
@@ -38,7 +38,7 @@ Optional: `pip install "graphifyy[mcp]"` to enable MCP stdio server (queries bec
 1. **Verify graphify output exists** — check for `graphify-out/graph.json`. If missing, halt with:
    ```
    FAIL: graphify-out/graph.json not found.
-   Run: graphify .
+   Run: /graphify . (skill · subscription)
    ```
 2. **Read the highlights** — `graphify-out/GRAPH_REPORT.md` (markdown summary of key concepts + surprising connections).
 3. **Resolve the question type**:
@@ -47,7 +47,7 @@ Optional: `pip install "graphifyy[mcp]"` to enable MCP stdio server (queries bec
    - **Cross-modal** (code↔doc / code↔diagram) → leverage graphify's multi-modal edges
 4. **If graphify MCP is configured** — prefer MCP query over file read (programmatic, more current).
 5. **Cite sources** — every answer cites specific graph nodes (`file:line`) or doc references.
-6. **No code modification** — this skill answers questions; user dispatches `/refactor-advisor`, `/adlc-orchestrator`, etc. as next step.
+6. **No code modification** — this skill answers questions; user dispatches `/refactor-advisor`, `/orchestrator`, etc. as next step.
 
 ## Output Format
 

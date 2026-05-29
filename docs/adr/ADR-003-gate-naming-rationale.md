@@ -38,7 +38,7 @@ Three naming schemes were considered (session AskUserQuestion 2026-05-19):
 
 **3. Codes appear in CONTEXT.md gates section as headings.** Mode table lists gates fired per mode using these codes.
 
-**4. `adlc-orchestrator` output prefixes gate verdicts with the code.** Examples: `HG — pass`, `VG — NO-GO`, `MG — regression delta within tolerance`.
+**4. `orchestrator` output prefixes gate verdicts with the code.** Examples: `HG — pass`, `VG — NO-GO`, `MG — regression delta within tolerance`.
 
 ## Alternatives Considered
 

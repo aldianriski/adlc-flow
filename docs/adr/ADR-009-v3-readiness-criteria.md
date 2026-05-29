@@ -54,7 +54,7 @@ Tier A is achievable internally; Tier B requires the marketplace adoption cycle.
 | Criterion | Evidence |
 |---|---|
 | 28 skills under caps | `docs/audit/skill-eval-report.md` 0 violations |
-| All references linked | `skills/{adr-writer,adlc-orchestrator,agent-architect,golden-dataset,lean-doc-generator,responsibility-map}/SKILL.md` Reference sections added in v2.10.0 |
+| All references linked | `skills/{adr-writer,orchestrator,agent-architect,golden-dataset,lean-doc-generator,responsibility-map}/SKILL.md` Reference sections added in v2.10.0 |
 | 5 trials documented | `docs/audit/trial-friction-log.md` Trial 1-5 + Trial 5 closing addendum |
 | 7 post-VG skills exercised | `temidev/docs/tier3-exercise/` 7 artifacts produced against F3b SoW drafter |
 | Mature adopter through P4 | temidev: 47 ADRs · 32 closed sprints · ~959 tests · F3b at P4 build · 11 commits this cycle |

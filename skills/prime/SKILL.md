@@ -18,7 +18,7 @@ Ordered context loader + health check. One-shot session priming.
 - After `/clear` to reload context without restarting the session.
 - When the session feels stale and you want to confirm what state the assistant is operating against.
 
-Not a substitute for `/zoom-out` (mid-session orientation) or `/adlc-orchestrator` (task execution).
+Not a substitute for `/zoom-out` (mid-session orientation) or `/orchestrator` (task execution).
 
 ## Read order
 
@@ -43,7 +43,7 @@ Not a substitute for `/zoom-out` (mid-session orientation) or `/adlc-orchestrato
 3. Parse `TODO.md` frontmatter → resolve active sprint number; count `Backlog` open tasks too.
 4. Count incomplete tasks (`- [ ]` lines under `## Active Sprint` heading).
 5. Emit health report.
-6. Emit `Next:` line based on detection: active sprint + open tasks → `/adlc-orchestrator`; active sprint + zero open → close sprint via lean-doc-generator; no sprint + backlog has tasks → promote backlog; no canonical artifacts → `/adlc-orchestrator init`.
+6. Emit `Next:` line based on detection: active sprint + open tasks → `/orchestrator`; active sprint + zero open → close sprint via lean-doc-generator; no sprint + backlog has tasks → promote backlog; no canonical artifacts → `/orchestrator init`.
 
 ## Output format
 
@@ -55,11 +55,11 @@ Not a substitute for `/zoom-out` (mid-session orientation) or `/adlc-orchestrato
 [OK]         docs/sprint/SPRINT-001-bootstrap.md (partial)
 [OK]         HYPOTHESIS.md · RESPONSIBILITY-MAP.md · OBSERVABILITY.md
 [MISSING]    COST-BUDGET.md · MODEL-UPGRADE-LOG.md
-[OK]         graphify-out/GRAPH_REPORT.md       (or [MISSING] — install: pip install graphifyy && graphify .)
+[OK]         graphify-out/GRAPH_REPORT.md       (or [MISSING] — install: pip install graphifyy && graphify install · /graphify .)
 Sprint:      001 (Bootstrap)
 Tasks:       3 open / 5 total
 Status:      ready
-Next:        run /adlc-orchestrator to continue Sprint 001 (3 open tasks)
+Next:        run /orchestrator to continue Sprint 001 (3 open tasks)
 ====================
 ```
 

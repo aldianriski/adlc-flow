@@ -115,24 +115,35 @@ ADLC has more checkpoints than SDLC because the system is probabilistic and post
 
 - **mode → gate** — each mode declares which gate(s) fire on transition (see Modes table).
 - **gate → skill** — HG=`hypothesis-register`, SG=`responsibility-map` (v0.2), AG=`agent-architect`, VG=`pov-gate`, RG=`release-readiness` (v0.2), MG=`model-upgrade` (v0.2).
-- **orchestrator → all** — `adlc-orchestrator` is the only thing that dispatches phase work; never self-implement.
+- **orchestrator → all** — `orchestrator` is the only thing that dispatches phase work; never self-implement.
 - **CONTEXT.md → all** — every skill reads this file first.
 
 ---
 
 ## Knowledge-graph backend
 
-Per [ADR-005](../docs/adr/ADR-005-graphify-adoption.md), adlc-flow adopts [graphify](https://graphify.net) (MIT, 49k★) as the canonical knowledge-graph backend. **Hard dep** for `/zoom-out`, `/context-engineer`, `/graph-query`. **Soft dep** for `/prime` (warns if missing). Install: `pip install graphifyy && graphify install && graphify .`. `codemap-refresh` retired in v2.1.0.
+Per [ADR-005](../docs/adr/ADR-005-graphify-adoption.md), adlc-flow adopts [graphify](https://graphify.net) (MIT, 49k★) as the canonical knowledge-graph backend. **Hard dep** for `/zoom-out`, `/context-engineer`, `/graph-query`. **Soft dep** for `/prime` (warns if missing). Install: `pip install graphifyy && graphify install`, then build with **`/graphify .`** (the skill → semantic pass on your Claude Code subscription, no API key) — the external `graphify .` CLI instead uses an API key / local model. Per-path billing: ADR-005 §8. `codemap-refresh` retired in v2.1.0.
 
 ---
 
-## Skill Roster (v2.1 — 28 skills total)
+## Usage tiers (ADR-010)
+
+Match ceremony to the work — most days are **Daily core**:
+- **Daily core** — `/prime` → work → `/lean-doc-generator`. No gates; orchestrator optional. General dev + docs.
+- **Per-feature** — `traditional` mode + `/tdd` · `/test-planner` · `/adr-writer` · `code-reviewer` · release. A real feature/sprint.
+- **Agentic (opt-in)** — `discover`→`operate` + HG/SG/AG/VG/RG/MG + the agentic-tier artifacts in `doc-registry.json`.
+
+Required docs/artifacts + owner skill + tier live in **`doc-registry.json`** (single source of truth). `/lean-doc-generator` checks completeness against it and hands off agentic-tier artifacts to their owner skills rather than improvising them.
+
+---
+
+## Skill Roster (28 skills · 14 ADLC + 14 universal · see doc-registry.json for tiers)
 
 ### Agentic lifecycle (ADLC-native — 14)
 
 | Skill | Phase | Purpose |
 |---|---|---|
-| `adlc-orchestrator` | all | phase-aware dispatcher; includes `init` mode |
+| `orchestrator` | all | phase-aware dispatcher; includes `init` mode |
 | `hypothesis-register` | P0 | testable hypothesis + kill-criteria artifact |
 | `responsibility-map` | P1 | human–agent decision/approval grid |
 | `agent-architect` | P2 | ReAct / Plan-Execute / multi-agent decision + ADR |
@@ -191,7 +202,7 @@ Per [ADR-005](../docs/adr/ADR-005-graphify-adoption.md), adlc-flow adopts [graph
 | `performance-analyst` | hot-path / DB / API + high risk | orchestrator (propose → approve) |
 | `migration-analyst` | DB schema change detected | orchestrator (propose → approve) |
 
-Dispatcher role lives in `adlc-orchestrator` skill.
+Dispatcher role lives in `orchestrator` skill.
 
 ---
 
@@ -226,4 +237,4 @@ Migration is mechanical:
 - Sprint protocols (`lean-doc-generator` promote/execute/close) work identically.
 - Existing dev-flow adopters can keep using dev-flow v4.x or migrate at their own pace.
 
-Skipped from absorption (true overlap with adlc-flow): `orchestrator` (replaced by `adlc-orchestrator`); `task-decomposer` (replaced by `hypothesis-register` for agentic features + direct TODO entry for code-side tasks).
+Skipped from absorption (true overlap with adlc-flow): `orchestrator` (replaced by `orchestrator`); `task-decomposer` (replaced by `hypothesis-register` for agentic features + direct TODO entry for code-side tasks).

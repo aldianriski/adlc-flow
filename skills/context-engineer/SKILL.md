@@ -18,7 +18,7 @@ For surface-level orientation use `/zoom-out`. For interactive graph queries use
 ## Prerequisites
 
 ```bash
-pip install graphifyy && graphify install && graphify .
+pip install graphifyy && graphify install   # then build via /graphify . (skill · subscription · no API key)
 # Optional but recommended:
 pip install "graphifyy[mcp]"     # MCP stdio server for programmatic queries
 ```

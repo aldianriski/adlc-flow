@@ -1,6 +1,6 @@
 ---
 name: eval-analyst
-description: Use when the orchestrator needs read-only analysis of an agentic feature's eval setup — methodology choice, threshold sanity, golden-dataset adequacy. Spawned by adlc-orchestrator at AG and VG gates. Returns recommendations; never modifies files.
+description: Use when the orchestrator needs read-only analysis of an agentic feature's eval setup — methodology choice, threshold sanity, golden-dataset adequacy. Spawned by orchestrator at AG and VG gates. Returns recommendations; never modifies files.
 model: claude-sonnet-4-6
 tools: Read Grep Glob Bash(node scripts/eval-skills.js)
 ---

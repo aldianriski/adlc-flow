@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "description": "Single source of truth for the docs/artifacts an adlc-flow project should keep current. Consumed by scripts/session-start.js (presence warnings), /lean-doc-generator (completeness check + handoff), and /adlc-orchestrator (tiering). See ADR-010. Paths are adopter-project-relative.",
+  "tiers": {
+    "always": "Core docs every project keeps current, agentic or traditional.",
+    "agentic": "ADLC lifecycle artifacts — only required when building an LLM-core / agentic feature."
+  },
+  "docs": [
+    { "id": "claude-md",          "path": ".claude/CLAUDE.md",     "kind": "file", "tier": "always",  "owner": "lean-doc-generator",            "purpose": "AI context — project overview + guardrails" },
+    { "id": "context-md",         "path": ".claude/CONTEXT.md",    "kind": "file", "tier": "always",  "owner": "lean-doc-generator",            "purpose": "vocab · gates · modes · skill roster" },
+    { "id": "readme",             "path": "README.md",             "kind": "file", "tier": "always",  "owner": "lean-doc-generator",            "purpose": "WHERE — entry point + quick start" },
+    { "id": "changelog",          "path": "CHANGELOG.md",          "kind": "file", "tier": "always",  "owner": "release-manager / release-patch", "purpose": "release history" },
+    { "id": "adr",                "path": "docs/adr/",             "kind": "dir",  "tier": "always",  "owner": "adr-writer",                    "purpose": "WHY — hard-to-reverse decisions" },
+    { "id": "hypothesis",         "path": "HYPOTHESIS.md",         "kind": "file", "tier": "agentic", "owner": "hypothesis-register",           "purpose": "P0 falsifiable hypothesis + kill-criteria" },
+    { "id": "responsibility-map", "path": "RESPONSIBILITY-MAP.md", "kind": "file", "tier": "agentic", "owner": "responsibility-map",            "purpose": "P1 human-agent decision/approval grid" },
+    { "id": "eval-suite",         "path": "EVAL-SUITE/",           "kind": "dir",  "tier": "agentic", "owner": "eval-suite-planner",            "purpose": "P2/P3 eval suite plan + VG verdicts" },
+    { "id": "golden-dataset",     "path": "GOLDEN-DATASET/",       "kind": "dir",  "tier": "agentic", "owner": "golden-dataset",                "purpose": "P3 ground-truth corpus" },
+    { "id": "observability",      "path": "OBSERVABILITY.md",      "kind": "file", "tier": "agentic", "owner": "ai-observe",                    "purpose": "P6/P7 behavioral + operational schema" },
+    { "id": "cost-budget",        "path": "COST-BUDGET.md",        "kind": "file", "tier": "agentic", "owner": "cost-budget",                   "purpose": "cross-phase token-economics budget" },
+    { "id": "feedback-log",       "path": "FEEDBACK-LOG.md",       "kind": "file", "tier": "agentic", "owner": "ai-observe (P7 operate)",       "purpose": "P7 feedback loop" },
+    { "id": "model-upgrade-log",  "path": "MODEL-UPGRADE-LOG.md",  "kind": "file", "tier": "agentic", "owner": "model-upgrade",                 "purpose": "P7 MG-gate history" }
+  ]
+}

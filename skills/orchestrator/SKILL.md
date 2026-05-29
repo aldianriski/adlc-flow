@@ -1,5 +1,5 @@
 ---
-name: adlc-orchestrator
+name: orchestrator
 description: Use when starting, resuming, or completing any development task. Works for ANY project shape — greenfield (start fresh) OR mature existing codebase (preserves existing TODO.md · CHANGELOG · ADRs · sprint conventions per F4.2/F4.4/F8.1 detection · validated against 100-sprint+ mature adopters at Trial 5). Orchestrates two flows: (a) ADLC phase-gated workflow for agentic products (LLM-core agents, RAG, multi-agent) across discover/design/prove/build/validate/activate/operate modes with HG/SG/AG/VG/RG/MG gates; (b) traditional dev workflow for non-agentic features via universal skills (lean-doc-generator, adr-writer, tdd, pr-reviewer, etc.) with no ADLC gates. Both flows share sprint protocols and coexist with existing project conventions.
 user-invocable: true
 argument-hint: "[mode] [task-or-description]"
@@ -8,9 +8,15 @@ last-validated: "2026-05-20"
 type: rigid
 ---
 
-# adlc-orchestrator
+# orchestrator
 
 Phase-gated workflow for agentic products + traditional dev. Read `CONTEXT.md` before acting.
+
+## Usage tiers (ADR-010) — full chains: `references/optimal-flow.md`
+
+- **Daily core** (most days) — `/prime` → work → `/lean-doc-generator`. No gates; this dispatcher optional.
+- **Per-feature** — `traditional` + `/tdd` · `/test-planner` · `/adr-writer` · `code-reviewer` · release.
+- **Agentic (opt-in)** — `discover`→`operate` + HG/SG/AG/VG/RG/MG + agentic-tier artifacts (`doc-registry.json`).
 
 ## Adopter scenarios
 
@@ -42,6 +48,7 @@ Phase-gated workflow for agentic products + traditional dev. Read `CONTEXT.md` b
 | `operate` | P7 | MG per upgrade | feedback, drift, model upgrades |
 
 Freeform input dispatch:
+- Pure daily doc/dev work (no new feature, no agentic behavior) → skip gates; route to Daily core (`/prime` + `/lean-doc-generator`)
 - No `HYPOTHESIS.md` AND adopter-project not initialized → `init`
 - Task involves an LLM-core / agentic behavior → `discover` (or later mode if hypothesis exists)
 - Task is non-agentic (landing · API · refactor · ops) → `traditional`
@@ -85,5 +92,6 @@ This skill IS the dispatcher. Coordinate; never self-implement. Restate task as 
 ## References
 
 - `references/non-adlc-skill-integration.md` — handoff points for non-ADLC skills per phase (Trial 4b F7.4)
+- `references/optimal-flow.md` — tier model + daily/feature/agentic skill chains (ADR-010)
 
 > Output Discipline: see [`.claude/CONTEXT.md` § Output Discipline](../../.claude/CONTEXT.md#output-discipline).

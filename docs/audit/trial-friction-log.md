@@ -40,7 +40,7 @@ purpose: Multi-trial friction log for adlc-flow. Trial 1 (ticket triage v2.1→v
     - (c) make session-start treat missing CLAUDE.md as WARN not FAIL on a fresh adopter project (detect "no canonical artifacts present" = "freshly bootstrapping")
   - Recommendation: (a) — least friction. Add `templates/CLAUDE.md.template` + scaffold step in init.js.
 - **F0.3 — Init's "Next:" message assumes adlc-flow plugin already installed**
-  - Severity: LOW. The message `Next: run /adlc-orchestrator discover "<business pain point>"` doesn't work unless the adopter has `claude plugin add adlc-flow` first. Minor — slash commands only work inside Claude Code anyway, so any adopter typing slash commands knows the plugin is installed.
+  - Severity: LOW. The message `Next: run /orchestrator discover "<business pain point>"` doesn't work unless the adopter has `claude plugin add adlc-flow` first. Minor — slash commands only work inside Claude Code anyway, so any adopter typing slash commands knows the plugin is installed.
 
 ### Outputs
 - `HYPOTHESIS.md` (1978 bytes) ✓
@@ -278,9 +278,9 @@ Recommend: **yes** — release v2.1.0 + v2.2.0 together to external adopters. Re
 ### HIGH — structural gaps for real adopters
 
 - **F4.1 — No documented path for "traditional-only adopter"** *(HIGH)*
-  - `adlc-orchestrator` modes are all ADLC-flavored (`discover`/`design`/`prove`/`build`/`validate`/`activate`/`operate` + `init`). Landing page doesn't fit any. Naraly is hybrid: agentic product (apps/web) + traditional marketing (apps/landing).
-  - I bypassed `/adlc-orchestrator` entirely; used `/lean-doc-generator` + `/adr-writer` directly. Real adopters would be confused: "do I run `discover`? doesn't fit a landing. `hypothesis-register`? no AI feature."
-  - **Fix**: add `traditional` mode to `adlc-orchestrator` dispatching to universal skills (no ADLC gates fire); update orchestrator description to name both audiences.
+  - `orchestrator` modes are all ADLC-flavored (`discover`/`design`/`prove`/`build`/`validate`/`activate`/`operate` + `init`). Landing page doesn't fit any. Naraly is hybrid: agentic product (apps/web) + traditional marketing (apps/landing).
+  - I bypassed `/orchestrator` entirely; used `/lean-doc-generator` + `/adr-writer` directly. Real adopters would be confused: "do I run `discover`? doesn't fit a landing. `hypothesis-register`? no AI feature."
+  - **Fix**: add `traditional` mode to `orchestrator` dispatching to universal skills (no ADLC gates fire); update orchestrator description to name both audiences.
 
 - **F4.2 — `init` mode assumes greenfield adopter project** *(HIGH)*
   - Naraly already has `.claude/CLAUDE.md`, `docs/`, `TODO.md`, `CHANGELOG.md`, ADRs, sprint conventions. `init` halts when canonical artifacts exist (per current orchestrator step 1: "if any exist, halt and ask").
@@ -320,7 +320,7 @@ Recommend: **yes** — release v2.1.0 + v2.2.0 together to external adopters. Re
 - **F4.10** — No `/deploy-plan` skill. Vercel-separate-project + env-var setup + custom domain pattern lives only in ADR-001 body.
 - **F4.11** — No "scenario → skill chain" cheatsheet in README. Adopters discover by reading every SKILL.md.
 - **F4.12** — No "design-tokens canonical location" guidance (F4.7's preventive variant).
-- **F4.13** — adlc-orchestrator description doesn't surface the "existing-project + non-greenfield" path.
+- **F4.13** — orchestrator description doesn't surface the "existing-project + non-greenfield" path.
 
 ## The deepest insight
 
@@ -334,7 +334,7 @@ The absorption was right. The orchestrator-as-narrow-ADLC-only framing needs to 
 
 | Task | Touches |
 |---|---|
-| F4.1 — `traditional` mode in `adlc-orchestrator` + dispatch table | SKILL.md update |
+| F4.1 — `traditional` mode in `orchestrator` + dispatch table | SKILL.md update |
 | F4.2 — `init` mode handles existing-project gracefully | SKILL.md + init.js stdout |
 | F4.3 — SPRINT_PROTOCOLS.md allows parallel tracks (no file overlap) | references update |
 | F4.4 — `/adr-writer` detects existing ADR convention | SKILL.md + procedure.md |
@@ -534,7 +534,7 @@ User initially picked hybrid multi-agent (Plan-and-Execute + multi-agent executo
 - **F6.5 — Mock-first PoV scaffold pattern caught 3 real bugs at $0 cost** *(POSITIVE · P3 best practice)*
   - Built the PoV pipeline (planner + executor + eval-runner) with deterministic mock LLM implementations before wiring real Anthropic SDK. Ran eval against 4 golden samples, surfaced 3 latent bugs in the mock heuristics (false-positive IP flag · copy-strategy too conservative · hallucination guards missed).
   - These bugs would have been MUCH more expensive to surface with the live LLM (real tokens, slower iteration, mock-real divergence ambiguity).
-  - **Pattern worth promoting**: P3 prep should include "scaffold pipeline with mock implementations before wiring live LLM." Could document in a `references/mock-first-pov.md` reference for `/golden-dataset` skill, or as a phase-3 best practice in `adlc-orchestrator`.
+  - **Pattern worth promoting**: P3 prep should include "scaffold pipeline with mock implementations before wiring live LLM." Could document in a `references/mock-first-pov.md` reference for `/golden-dataset` skill, or as a phase-3 best practice in `orchestrator`.
 
 ### Trial 4 findings tally
 
@@ -607,7 +607,7 @@ Eval-runner at `apps/web/scripts/eval-landing.ts` loads samples · runs `generat
 
 - **F7.4 — No documented integration points with non-ADLC skills** *(LOW)*
   - User invoked `/frontend-design` mid-AG work to polish themes. Worked great. But there's no documentation telling adopters when to invoke specialized non-ADLC skills (`/frontend-design`, `/supabase`, `/skill-creator`, etc.) during the ADLC lifecycle. The pattern emerged organically.
-  - **Fix**: add an "Integration with non-ADLC skills" section to `adlc-orchestrator/references/` documenting recommended hand-off points (e.g. "at P2/P3 visual polish step, consider /frontend-design for distinctive aesthetic direction").
+  - **Fix**: add an "Integration with non-ADLC skills" section to `orchestrator/references/` documenting recommended hand-off points (e.g. "at P2/P3 visual polish step, consider /frontend-design for distinctive aesthetic direction").
 
 #### POSITIVE — patterns worth promoting
 
@@ -688,12 +688,12 @@ User said: cost OK (Max subscription) · sequence Foundation → AI wedges → p
   - **Fix**: `bin/adlc-flow-init.js` should detect (a) existing `docs/adr/` dir OR (b) existing `docs/DECISIONS.md` file OR (c) `docs/decisions/` dir, and EITHER skip the .gitkeep OR write a sentinel `docs/adr/POINTER.md` that says "ADRs live in ../DECISIONS.md per existing convention; adlc-flow's `/adr-writer` will detect this at write-time."
 
 - **F8.2 — No migration guide from `/dev-flow` to `/adlc-flow`** *(MEDIUM)*
-  - temidev's `.claude/CLAUDE.md` Session Workflow section says "Use `/prime` → `/lean-doc-generator` → `/orchestrator`" — those are dev-flow vocabulary. adlc-flow's vocabulary is `/adlc-orchestrator` (with different modes) and the `/lean-doc-generator` slash command happens to still exist (absorbed at v2.0 per ADR-004) but `/orchestrator` and `/prime` may or may not be exposed under those names. The adopter who has dev-flow muscle memory will type `/orchestrator` and either get the wrong thing OR get a no-op.
+  - temidev's `.claude/CLAUDE.md` Session Workflow section says "Use `/prime` → `/lean-doc-generator` → `/orchestrator`" — those are dev-flow vocabulary. adlc-flow's vocabulary is `/orchestrator` (with different modes) and the `/lean-doc-generator` slash command happens to still exist (absorbed at v2.0 per ADR-004) but `/orchestrator` and `/prime` may or may not be exposed under those names. The adopter who has dev-flow muscle memory will type `/orchestrator` and either get the wrong thing OR get a no-op.
   - ADR-004 ("absorb dev-flow") doesn't ship a migration guide.
   - **Fix**: ship `docs/MIGRATION-FROM-DEV-FLOW.md` documenting (a) which dev-flow skills are still available under their original names (b) which got renamed (c) which are gone (d) what the new ADLC-specific skills add. Should be linked from README + from init.js's "Next steps" output.
 
 - **F8.3 — `init.js` "Next steps:" message assumes the plugin is enabled in adopter's `.claude/settings.json`** *(MEDIUM)*
-  - temidev's `.claude/settings.json` has `"enabledPlugins": {}`. Running `node bin/adlc-flow-init.js` succeeds but the printed message `Run /adlc-orchestrator discover "..."` won't work — the plugin isn't enabled. F0.3 (Trial 1 LOW) noted this; F8.3 promotes it to MEDIUM because the friction is sharper at mature-adopter scale.
+  - temidev's `.claude/settings.json` has `"enabledPlugins": {}`. Running `node bin/adlc-flow-init.js` succeeds but the printed message `Run /orchestrator discover "..."` won't work — the plugin isn't enabled. F0.3 (Trial 1 LOW) noted this; F8.3 promotes it to MEDIUM because the friction is sharper at mature-adopter scale.
   - **Fix**: init.js inspects `.claude/settings.json` at end-of-run and prints either "✓ adlc-flow is enabled" OR "⚠ Run `claude plugin add adlc-flow` (or edit .claude/settings.json `enabledPlugins`) before invoking slash commands." Optional: offer to patch settings.json automatically if user passes `--enable`.
 
 - **F8.4 — `init.js` doesn't acknowledge or preserve existing project's TODO.md / CHANGELOG conventions** *(MEDIUM)*
@@ -950,7 +950,7 @@ Surgical minimum: added `agreements` nav entry to all 3 shells (admin · ops · 
 
 - **F8.15 — Mature-adopter dashboards already exist; F4+F5 polish is incremental nav-surface work, not greenfield UI** *(POSITIVE · recon-first principle validated again)*
   - Trial 5 user request was "create a proper dashboard for every role (client, ops, admin)". Recon revealed all 3 dashboards (admin/page.tsx · ops/page.tsx · portal/page.tsx) already exist with role-specific overview-card + quick-link-tile patterns from earlier sprints. The actual surgical scope reduced to: add 3 nav entries to 3 sidebars + 6 i18n strings. ~10 minutes of work vs. what would have been ~4 hours if I'd taken the headline literally.
-  - **4th cross-trial validation of `feedback_recon_first` rule** (Sprints 050 + 051a + Trial 5 F3a + Trial 5 F4-F5). Each validation has reduced sprint scope by 50%-85%. Pattern is robust enough now to formalize: a `skills/lean-doc-generator/references/recon-first-discipline.md` reference doc OR an explicit "recon" step in `/adlc-orchestrator discover` mode would surface this discipline for adopter consumption.
+  - **4th cross-trial validation of `feedback_recon_first` rule** (Sprints 050 + 051a + Trial 5 F3a + Trial 5 F4-F5). Each validation has reduced sprint scope by 50%-85%. Pattern is robust enough now to formalize: a `skills/lean-doc-generator/references/recon-first-discipline.md` reference doc OR an explicit "recon" step in `/orchestrator discover` mode would surface this discipline for adopter consumption.
   - Filing as v2.8+ adlc-flow improvement candidate: codify the recon-first rule as a plugin-level pattern.
 
 ### What worked (positive · no friction)
@@ -1221,7 +1221,7 @@ Walked the ADLC discipline for the AI clause risk flagger feature (H-002 · clas
 | F4.9 | `templates/I18N-BILINGUAL.md.template` — bilingual i18n + key-parity | validated at 1700+ key scale (temidev) |
 | F4.10 | `templates/DEPLOY-PLAN.md.template` — Vercel + Supabase deploy + rollback | 8-section runbook |
 | F4.11 | README `Scenario → skill cheatsheet` (18 scenarios) | adopter-onboarding cliff closed |
-| F4.13 | `/adlc-orchestrator` description + 8-row Adopter scenarios matrix | mature-adopter visibility |
+| F4.13 | `/orchestrator` description + 8-row Adopter scenarios matrix | mature-adopter visibility |
 
 ### Trial 5 cross-trial scoring
 
@@ -1316,7 +1316,7 @@ User pivoted the session: rather than the agentic eval realignment (still parked
 - **F9.5 — `SETUP-supabase` migration conventions + mock-first transferred cleanly** *(POSITIVE)*
   - The header-docblock (Purpose/Tables/DOWN/DATA) + `IF NOT EXISTS` + `COMMENT ON TABLE` migration convention applied directly and made the migration self-documenting. The "author-for-later / mock without live DB" guidance (mock-first-pov reference) is exactly what let the skeleton typecheck + render in skeleton mode with no Supabase project. Both v2.8/v2.9 templates earned their keep on a *different* domain than they were filed against — cross-domain validation.
 
-- **F9.6 — adopter built a whole platform shell without reaching for `/adlc-orchestrator` traditional mode** *(OBSERVATION · worth a look)*
+- **F9.6 — adopter built a whole platform shell without reaching for `/orchestrator` traditional mode** *(OBSERVATION · worth a look)*
   - For a multi-module traditional-dev scaffold, the natural flow was just "design + build directly," not invoking the orchestrator. The orchestrator's `traditional` mode + scope-analyst (ADR-007) is meant for exactly this, but nothing pulled me toward it. Question for adlc-flow: is traditional-mode discoverability too low, or is direct-build genuinely fine for skeleton work and the orchestrator only earns its cost on risk/blast-radius? No fix yet — flagging for the next traditional-dev trial to confirm.
 
 ### Phase 4 build tally

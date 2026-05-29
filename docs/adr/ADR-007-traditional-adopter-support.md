@@ -13,7 +13,7 @@ status: decided
 
 ## Context
 
-The 2026-05-20 Naraly landing trial (`docs/audit/trial-friction-log.md` § Trial 2) surfaced a structural framing gap: adlc-flow's `/adlc-orchestrator` is implicitly designed for fresh adopters building agentic products start-to-finish. Real adopters often have:
+The 2026-05-20 Naraly landing trial (`docs/audit/trial-friction-log.md` § Trial 2) surfaced a structural framing gap: adlc-flow's `/orchestrator` is implicitly designed for fresh adopters building agentic products start-to-finish. Real adopters often have:
 
 1. **Existing mature projects** with established conventions (CLAUDE.md, TODO.md, ADRs, sprint shape)
 2. **Multiple concurrent tracks** (e.g., product backend wiring + parallel marketing landing)
@@ -25,7 +25,7 @@ Three HIGH findings cluster here (F4.1 · F4.2 · F4.3). Same root cause; single
 
 ## Decision
 
-**1. Add a `traditional` mode to `adlc-orchestrator`.**
+**1. Add a `traditional` mode to `orchestrator`.**
 - New entry in the Mode Dispatch table: `traditional` — no ADLC gates fire; dispatches universal skills (`/lean-doc-generator`, `/adr-writer`, `/pr-reviewer`, `/tdd`, `/test-planner`, `/refactor-advisor`, `/diagnose`, `/release-manager`, `/release-patch`) for non-agentic work
 - Triggered by: explicit `traditional` argument, OR freeform input + no `HYPOTHESIS.md` ratified entry + no agentic-indicator keywords (LLM · agent · RAG · prompt)
 - Orchestrator description updated to name both audiences (agentic product builders + traditional-dev-with-AI-assistance)
@@ -51,7 +51,7 @@ Three HIGH findings cluster here (F4.1 · F4.2 · F4.3). Same root cause; single
 ## Alternatives Considered
 
 - **Status quo — document workarounds in README only.** Rejected: pushes friction onto every adopter; framing gap stays in the orchestrator itself.
-- **Split adlc-orchestrator into two skills (`/adlc-agentic` + `/adlc-traditional`).** Rejected: two slash commands for one mental concept; adopters with hybrid projects would need to remember which command per feature. Single skill with mode dispatch is the proven pattern.
+- **Split orchestrator into two skills (`/adlc-agentic` + `/adlc-traditional`).** Rejected: two slash commands for one mental concept; adopters with hybrid projects would need to remember which command per feature. Single skill with mode dispatch is the proven pattern.
 - **Deprecate the "one active sprint" rule entirely.** Rejected: still useful for single-track focus; the right fix is "parallel tracks when file-disjoint", not unlimited concurrency.
 - **Force adopters to migrate `docs/DECISIONS.md` → `docs/adr/` at install time.** Rejected: hostile migration; respect existing conventions.
 - **Defer to v2.4+.** Considered. Rejected because Trial 2 caught these in the SECOND ever real-world exercise; deferring means every subsequent adopter hits them. v2.3.0 is the right release.
@@ -66,7 +66,7 @@ Three HIGH findings cluster here (F4.1 · F4.2 · F4.3). Same root cause; single
 - ADR-writer respects existing conventions; no surprise file collisions.
 
 **Negative**
-- `adlc-orchestrator` SKILL.md grows ~10 lines to add `traditional` mode + new Phase block. May approach line cap; offset by trimming dispatcher-role paragraph.
+- `orchestrator` SKILL.md grows ~10 lines to add `traditional` mode + new Phase block. May approach line cap; offset by trimming dispatcher-role paragraph.
 - `/hypothesis-register` becomes more complex (5 type variants vs 1). Counter: most adopters use defaults; the `--type` flag only fires when explicitly chosen.
 - Two ADR conventions (legacy DECISIONS.md + modern docs/adr/) coexist; adopters might be uncertain which to extend. Mitigation: SKILL.md prefers `docs/adr/` for new ADRs; legacy file is read but not auto-extended unless it's the only convention.
 

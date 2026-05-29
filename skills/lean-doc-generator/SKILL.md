@@ -5,8 +5,8 @@ argument-hint: "[init | type subject | sprint-command]"
 allowed-tools: Read, Write, Bash(git *), Glob, Grep
 user-invocable: true
 type: rigid
-version: "1.0.0"
-last-validated: "2026-05-19"
+version: "1.0.1"
+last-validated: "2026-05-29"
 ---
 
 # Lean Documentation Generator
@@ -52,9 +52,12 @@ Generate high-signal technical documentation. Read `references/DOCS_Guide.md` be
 
 **Step 5 — Outline approval** *(init only)*: present Tier 1/2/3 options from `references/DOCS_Guide.md §6`; wait for human choice before writing.
 
-**Step 6 — Generate**: for each doc, read its template first if one exists. Write enforcing line limits + ownership header on every file.
+**Step 6 — Generate / reconcile**: for each doc —
+- **Template is mandatory when one exists.** Before writing, locate the matching template (`templates/<NAME>.template`, else the relevant template block in `references/DOCS_Guide.md`). If a template exists you MUST mirror its section structure — never write from memory or improvise sections. Only fall back to the DOCS_Guide Core-File shape when no template exists.
+- **Existing file ≠ skip.** If the target already exists, do NOT skip on file-presence alone. Diff its structure against the template/standard (sections present, ownership header, line limits). If the format has drifted, reconcile it to the standard while preserving content/intent. Leave a file untouched ONLY when it is already format-conformant AND unchanged this session — and say so explicitly in the Step 7 summary.
+- Write enforcing line limits + ownership header on every file.
 
-**Step 7 — Session close**: list docs delivered + ownership headers to verify + recommended updates.
+**Step 7 — Session close + doc-set completeness**: list docs delivered + ownership headers to verify. Then run the registry-driven completeness check — read `${CLAUDE_PLUGIN_ROOT}/doc-registry.json`, report every doc present / stale / missing. **Generate only the `always`-tier docs you own**; **hand off** `agentic`-tier artifacts to their owner skill (e.g. `✗ RESPONSIBILITY-MAP.md → /responsibility-map`) — never improvise them. Frame agentic misses as opt-in, not failures. Detail: `references/DOC_COMPLETENESS.md`.
 
 ---
 
@@ -77,12 +80,15 @@ Commit strategy: `sprint(NNN): plan locked` at promote · `sprint(NNN): <summary
 ❌ **Person as owner** ("Alice") — reassign to role
 ❌ **Stale doc as source** — run Step 1 first; flag before using as source
 ❌ **New file outside core set** — redirect to code comments or fit in existing Core File
+❌ **Existing doc skipped on presence alone** — existing ≠ conformant; always diff against the template/standard and reconcile format drift (Step 6) before leaving it
+❌ **Generated without its template** — when `templates/<NAME>.template` exists, output MUST mirror its structure; never improvise from memory
 
 ---
 
 ## Reference
 
 - `references/DOCS_Guide.md` — full standard: Core Files, line limits, templates, anti-patterns, pre-delivery checklist
+- `references/DOC_COMPLETENESS.md` — registry-driven doc-set completeness check + handoff rules (ADR-010)
 - `references/SPRINT_PROTOCOLS.md` — sprint promote/execute/close protocols
 - `references/FLOW_GRILL.md` — batched Q&A discipline for planning convergence
 - `references/recon-first-discipline.md` — recon-first sprint planning (4-trial-validated · 50-85% scope reduction)

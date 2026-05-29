@@ -30,7 +30,7 @@ adlc-flow is a plugin. The plugin is a means; **the adopter's agentic product is
 
 ## Skills — Agentic lifecycle (14) → outcomes
 
-- **`adlc-orchestrator`** → A2 · A3 · A7 — phase-aware dispatch; runs HG/SG/AG/VG/RG/MG gates; prevents skipping eval-first discipline. **Skip when:** the work isn't agentic — bypass the ADLC modes and invoke code-side skills (`/tdd`, `/pr-reviewer`, etc.) directly.
+- **`orchestrator`** → A2 · A3 · A7 — phase-aware dispatch; runs HG/SG/AG/VG/RG/MG gates; prevents skipping eval-first discipline. **Skip when:** the work isn't agentic — bypass the ADLC modes and invoke code-side skills (`/tdd`, `/pr-reviewer`, etc.) directly.
 - **`hypothesis-register`** → A1 — testable hypothesis + kill-criteria artifact at HG. **Skip when:** the agentic feature is a forced port from an existing deterministic feature with no business hypothesis (rare).
 - **`responsibility-map`** → A6 · A4 — human–agent decision/approval grid at SG. **Skip when:** the feature has zero agent-driven user-visible actions (e.g., backend-only ranking with deterministic post-processing).
 - **`agent-architect`** → A2 · A3 — ReAct vs Plan-Execute vs multi-agent decision; co-produces ADR + initial eval strategy. **Skip when:** architecture is dictated by a parent framework — document the constraint via `/adr-writer` instead.
@@ -50,7 +50,7 @@ adlc-flow is a plugin. The plugin is a means; **the adopter's agentic product is
 ## Skills — Universal dev workflow (14, absorbed from dev-flow per ADR-004) → outcomes
 
 - **`prime`** → A6 — deterministic context load on session start. **Skip when:** resuming mid-session with context still warm.
-- **`zoom-out`** → A2 — module map via graphify knowledge graph (HARD dep per ADR-005). **Skip when:** implementation plan already exists (use `/adlc-orchestrator`); halt with install hint if `graphify-out/graph.json` absent.
+- **`zoom-out`** → A2 — module map via graphify knowledge graph (HARD dep per ADR-005). **Skip when:** implementation plan already exists (use `/orchestrator`); halt with install hint if `graphify-out/graph.json` absent.
 - **`graph-query`** → A2 · A8 — NL query interface against graphify graph (HARD dep). **Skip when:** question is a simple file-grep with no semantic / cross-modal component; use Grep tool directly.
 - **`pr-reviewer`** → A7 · A2 — 7-lens code review. **Skip when:** docs-only PR with no behavior change.
 - **`security-auditor`** → A7 · A2 — OWASP audit in separate session. **Skip when:** governance/docs change with no security surface.
@@ -102,7 +102,7 @@ adlc-flow is a plugin. The plugin is a means; **the adopter's agentic product is
 
 ## Hooks (2) → outcomes
 
-- **SessionStart** (Node) → A6 · A3 — verifies CLAUDE.md + scans for canonical artifacts (HYPOTHESIS · RESPONSIBILITY-MAP · etc.); warns adopter to run `/adlc-orchestrator init` if missing. **Skip when:** N/A — hook-fired; manual disable only by editing settings.
+- **SessionStart** (Node) → A6 · A3 — verifies CLAUDE.md + scans for canonical artifacts (HYPOTHESIS · RESPONSIBILITY-MAP · etc.); warns adopter to run `/orchestrator init` if missing. **Skip when:** N/A — hook-fired; manual disable only by editing settings.
 - **PostToolUse artifact-integrity** (Node) → A6 · A2 — when canonical artifact is edited, checks `last_updated` is current. Warn-only. **Skip when:** N/A — silent guardrail.
 
 ---

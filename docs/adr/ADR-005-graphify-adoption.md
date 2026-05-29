@@ -1,6 +1,6 @@
 ---
 owner: Tech Lead (Aldian Rizki)
-last_updated: 2026-05-19
+last_updated: 2026-05-29
 update_trigger: ADR status change OR graphify-integration scope revised
 status: decided
 ---
@@ -59,6 +59,8 @@ The ours-vs-theirs gap is not "ours is rougher" — it's a category difference. 
 
 **7. Python ≥3.10 becomes a soft dep for adlc-flow.** Currently adlc-flow ships Node-only. With graphify integration, adopters who want the deep knowledge-graph features need Python ≥3.10. Adlc-flow's Node-only scripts (init, eval-skills, session-start, artifact-integrity) remain unchanged.
 
+**8. Two execution paths — prefer the `/graphify` skill for $0-to-API billing (amended 2026-05-29).** graphify's semantic extraction runs two ways: **(a)** the **`/graphify` skill** dispatches the semantic pass as Claude Code subagents — billed to the active Claude Code session (subscription on Max/Pro), **no separate API key**; **(b)** the **external `graphify .` / `graphify extract` CLI** runs as a Python process using the adopter's own provider API key (metered $), or a local model (Ollama, $0). For adopters on a Claude subscription, **prefer `/graphify`** (and `/graphify <path> --update` for cheap incremental — code-only changes = $0) so the first/full build costs no API spend. The API-key cost noted in Context + Consequences applies only to path (b). Caveat: if the Claude Code session itself is authenticated to an API key rather than a subscription, path (a) bills to the API too — verify with `/status`.
+
 ## Alternatives Considered
 
 - **A — Recommend graphify in README, no integration.** Rejected: leaves the underwhelming `codemap-refresh` in place, doesn't capture the 71.5× token reduction inside any adlc-flow skill.
@@ -78,7 +80,7 @@ The ours-vs-theirs gap is not "ours is rougher" — it's a category difference. 
 
 **Negative**
 - Python ≥3.10 becomes a soft requirement. Pure JS/Go/Rust shops without Python on dev machines need to install it (`brew install python@3.12`, `apt install python3.12`, `winget install Python.Python.3.12`). Mitigated: only matters when adopter wants knowledge-heavy skills.
-- LLM tokens spent on graphify's semantic extraction (adopter's own API key). Cost is one-time per `graphify .` build; minor relative to ongoing query savings.
+- LLM tokens spent on graphify's semantic extraction. **Billing depends on path (see Decision 8):** via the `/graphify` skill → Claude Code subscription, no API key; via the external `graphify .` CLI → adopter's own API key (metered) or a local model ($0). Cost is one-time per full build; `--update` on code-only changes is $0. Minor relative to ongoing query savings.
 - External dependency. If graphify abandons or breaks backward compatibility, our knowledge-heavy skills break too. Mitigated: graphify is MIT-licensed; in worst case we can fork. Also: skills can fall back to clear "graphify not installed" messaging — they fail loud, not silent.
 - `/codemap-refresh` slash command disappears between v2.0 and v2.1 — small breaking change. Mitigated: pre-adoption stage; no documented external users yet.
 

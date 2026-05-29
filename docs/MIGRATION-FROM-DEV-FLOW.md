@@ -11,7 +11,7 @@ audience: Adopters of `dev-flow` (the predecessor plugin) considering migration 
 The universal-surface skills (sprint protocols · ADR writing · code review · debugging) were
 absorbed wholesale — they continue to work identically. The plugin adds ADLC-specific
 skills (`/hypothesis-register` · `/responsibility-map` · `/agent-architect` · `/pov-gate`
-etc.) for agentic feature work, plus an `/adlc-orchestrator` that coordinates the lifecycle.
+etc.) for agentic feature work, plus an `/orchestrator` that coordinates the lifecycle.
 
 This guide is for projects with existing `.claude/CLAUDE.md` referencing dev-flow slash
 commands. Per Trial 5 finding F8.2 (mature-adopter dogfood 2026-05-20), the migration
@@ -41,7 +41,7 @@ These slash commands behave identically in adlc-flow (no edits needed in your
 
 | dev-flow | adlc-flow | What to change |
 |---|---|---|
-| `/orchestrator` | `/adlc-orchestrator` | Different command name. `/orchestrator` may still resolve but the canonical name in v2.x is `/adlc-orchestrator`. Update your `.claude/CLAUDE.md` Session Workflow section. |
+| `/orchestrator` | `/orchestrator` | Different command name. `/orchestrator` may still resolve but the canonical name in v2.x is `/orchestrator`. Update your `.claude/CLAUDE.md` Session Workflow section. |
 
 ## NEW skills (no dev-flow analog)
 
@@ -82,7 +82,7 @@ using the universal-surface skills as before.
    v2.8.0+: this detects existing TODO.md / CHANGELOG / ADR conventions and adapts
    (F8.1 · F8.3 · F8.4). Idempotent — re-running skips existing files.
 
-3. **Edit `.claude/CLAUDE.md` Session Workflow** to reference `/adlc-orchestrator`
+3. **Edit `.claude/CLAUDE.md` Session Workflow** to reference `/orchestrator`
    alongside any dev-flow vocabulary you keep. Many projects keep dev-flow's
    `/prime` + `/lean-doc-generator` + `/orchestrator` as their daily-driver and only
    invoke ADLC-specific skills when agentic features land.
@@ -90,7 +90,7 @@ using the universal-surface skills as before.
 4. **Keep dev-flow installed** as long as you want, OR remove from
    `enabledPlugins`. Universal-surface skills resolve through adlc-flow regardless.
 
-5. **First agentic feature**: run `/adlc-orchestrator discover "<pain point>"` to walk
+5. **First agentic feature**: run `/orchestrator discover "<pain point>"` to walk
    HG → SG → AG before writing code. See the Trial 4 (umkm-indo) + Trial 5 (temidev)
    examples in `docs/audit/trial-friction-log.md` for canonical applications.
 

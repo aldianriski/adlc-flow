@@ -26,14 +26,25 @@ if (!root) {
 
 const claudeMd = path.join(root, '.claude', 'CLAUDE.md');
 
-const artifacts = [
-  { name: 'HYPOTHESIS.md',         purpose: 'P0 hypothesis register' },
-  { name: 'RESPONSIBILITY-MAP.md', purpose: 'P1 human-agent grid' },
-  { name: 'FEEDBACK-LOG.md',       purpose: 'P7 feedback loop' },
-  { name: 'MODEL-UPGRADE-LOG.md',  purpose: 'P7 MG-gate history' },
-  { name: 'OBSERVABILITY.md',      purpose: 'P6/P7 schema' },
-  { name: 'COST-BUDGET.md',        purpose: 'cross-phase budget' },
-];
+// Required-doc registry — single source of truth (doc-registry.json + ADR-010).
+// session-start ships inside the plugin, so resolve the registry relative to __dirname.
+// Fall back to a built-in list if the registry is missing/unreadable.
+let registryDocs;
+try {
+  registryDocs = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'doc-registry.json'), 'utf8')).docs;
+} catch (e) {
+  registryDocs = [
+    { path: 'HYPOTHESIS.md',         kind: 'file', tier: 'agentic', purpose: 'P0 hypothesis register' },
+    { path: 'RESPONSIBILITY-MAP.md', kind: 'file', tier: 'agentic', purpose: 'P1 human-agent grid' },
+    { path: 'FEEDBACK-LOG.md',       kind: 'file', tier: 'agentic', purpose: 'P7 feedback loop' },
+    { path: 'MODEL-UPGRADE-LOG.md',  kind: 'file', tier: 'agentic', purpose: 'P7 MG-gate history' },
+    { path: 'OBSERVABILITY.md',      kind: 'file', tier: 'agentic', purpose: 'P6/P7 schema' },
+    { path: 'COST-BUDGET.md',        kind: 'file', tier: 'agentic', purpose: 'cross-phase budget' },
+    { path: 'GOLDEN-DATASET/',       kind: 'dir',  tier: 'agentic', purpose: 'P3 ground-truth corpus' },
+  ];
+}
+// session-start warns only on agentic-tier artifacts (always-tier core docs are validated elsewhere).
+const artifacts = registryDocs.filter(d => d.tier === 'agentic');
 
 console.log('=== adlc-flow SESSION START ===');
 console.log('');
@@ -50,26 +61,27 @@ console.log('[OK] .claude/CLAUDE.md present');
 
 const missing = [];
 for (const a of artifacts) {
-  const p = path.join(root, a.name);
-  if (fs.existsSync(p)) {
-    console.log(`[OK] ${a.name.padEnd(26)} (${a.purpose})`);
+  const rel = a.path || a.name;
+  const isDir = a.kind === 'dir';
+  const p = path.join(root, rel);
+  const exists = fs.existsSync(p) && (!isDir || fs.statSync(p).isDirectory());
+  if (exists) {
+    let note = a.purpose;
+    if (isDir) {
+      const features = fs.readdirSync(p, { withFileTypes: true }).filter(d => d.isDirectory()).length;
+      note = `${a.purpose} · ${features} feature(s)`;
+    }
+    console.log(`[OK] ${rel.padEnd(26)} (${note})`);
   } else {
-    missing.push(a.name);
+    missing.push(rel);
   }
 }
 
 if (missing.length > 0) {
   console.log('');
-  console.log(`[WARN] Missing canonical artifacts: ${missing.join(', ')}`);
-  console.log('       Run: /adlc-orchestrator init    (or: node bin/adlc-flow-init.js)');
-}
-
-const gd = path.join(root, 'GOLDEN-DATASET');
-if (fs.existsSync(gd) && fs.statSync(gd).isDirectory()) {
-  const features = fs.readdirSync(gd, { withFileTypes: true }).filter(d => d.isDirectory()).length;
-  console.log(`[OK] GOLDEN-DATASET/ present (${features} feature(s) tracked)`);
-} else {
-  console.log('[WARN] GOLDEN-DATASET/ missing — run /adlc-orchestrator init to scaffold');
+  console.log(`[WARN] Missing agentic-lifecycle artifacts: ${missing.join(', ')}`);
+  console.log('       Needed ONLY when building an LLM-core feature (not for traditional/daily work).');
+  console.log('       Scaffold: /orchestrator init  ·  or check/handoff via /lean-doc-generator (doc-registry.json · ADR-010)');
 }
 
 const graphOut = path.join(root, 'graphify-out', 'graph.json');
@@ -97,7 +109,7 @@ if (fs.existsSync(graphOut)) {
         console.log(`     [WARN] auto-update failed: ${e.message} — skipping`);
       }
     } else {
-      console.log(`     stale > ${staleDays}d — \`graphify update .\` (no LLM) or \`graphify .\` (semantic, costs tokens). Set ADLC_GRAPHIFY_AUTO_UPDATE=1 to auto-run update on session start.`);
+      console.log(`     stale > ${staleDays}d — \`/graphify . --update\` (skill · subscription · code-only = $0) or \`graphify update .\` (CLI · AST-only · $0). Full \`/graphify .\` rebuilds the semantic pass on your subscription (no API key). Set ADLC_GRAPHIFY_AUTO_UPDATE=1 to auto-run update on session start.`);
     }
   }
 } else {

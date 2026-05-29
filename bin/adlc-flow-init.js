@@ -297,9 +297,9 @@ if (claudeMdResult?.wrote) {
 if (!pluginCheck.enabled && !ENABLE_FLAG) {
   console.log(`  ${stepNum++}. Enable adlc-flow: re-run \`node bin/adlc-flow-init.js --enable\` OR edit .claude/settings.json`);
 }
-console.log(`  ${stepNum++}. Run /adlc-orchestrator discover "<business pain point>" to fill HYPOTHESIS.md`);
+console.log(`  ${stepNum++}. Run /orchestrator discover "<business pain point>" to fill HYPOTHESIS.md`);
 console.log(`  ${stepNum++}. (Optional but recommended) install graphify for knowledge-graph backend:`);
-console.log('       pip install graphifyy && graphify install && graphify .');
+console.log('       pip install graphifyy && graphify install · then build via /graphify . (skill · subscription · no API key)');
 
 // ─── F8.6: commit-policy guidance ─────────────────────────────────────────────
 const adopterArtifactsWritten = fileResults.filter((r) => r.wrote && r.dest !== '.claude/CLAUDE.md').length;

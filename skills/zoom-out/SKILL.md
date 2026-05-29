@@ -1,6 +1,6 @@
 ---
 name: zoom-out
-description: Use when entering an unfamiliar area of the codebase or before a cross-cutting change. Produces a bird's-eye module map by querying the graphify knowledge graph (graphify-out/graph.json). Hard depends on graphify (https://graphify.net) — install via `pip install graphifyy && graphify install`. Read-only. No implementation suggestions. Do not use when you need an implementation plan; use adlc-orchestrator instead.
+description: Use when entering an unfamiliar area of the codebase or before a cross-cutting change. Produces a bird's-eye module map by querying the graphify knowledge graph (graphify-out/graph.json). Hard depends on graphify (https://graphify.net) — install via `pip install graphifyy && graphify install`. Read-only. No implementation suggestions. Do not use when you need an implementation plan; use orchestrator instead.
 user-invocable: true
 argument-hint: "[area | feature | module name]"
 allowed-tools: Read, Bash, Grep
@@ -22,7 +22,7 @@ For natural-language queries against the same graph use `/graph-query`.
 ```bash
 pip install graphifyy           # or: uv tool install graphifyy
 graphify install                # registers in Claude Code
-graphify .                      # build graphify-out/{graph.html, GRAPH_REPORT.md, graph.json}
+/graphify .                     # build graphify-out/ via skill (subscription · no API key)
 ```
 
 If `graphify-out/graph.json` is missing, this skill HALTS with install instructions. v1.x behavior (regex-based markdown-link scan) is retired per ADR-005.
@@ -81,7 +81,7 @@ LOAD THIS NEXT:
 
 ❌ **Falling back to file-walking when graph.json is missing** — HALT instead; users must build the graph first
 ❌ **Inventing domain terms not in graph or CONTEXT.md** — agent drift; defer to artifacts
-❌ **Suggesting implementation** — orientation only; use `/adlc-orchestrator`
+❌ **Suggesting implementation** — orientation only; use `/orchestrator`
 ❌ **Mapping >10 modules** — exceeds working-memory; narrow first
 ❌ **Reading full files** — graph already contains node summaries; raw reads waste the 71.5× token reduction
 

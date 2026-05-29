@@ -4,6 +4,29 @@ All notable changes to `adlc-flow` are documented here. Format: [Keep a Changelo
 
 ---
 
+## [4.0.0] — 2026-05-29
+
+### Breaking Changes
+- **Skill renamed `/adlc-orchestrator` → `/orchestrator`** — dropped the redundant `adlc-` prefix (the plugin is already `adlc-flow`). Directory, frontmatter, the skill-triggering fixture, and all references updated. Update any scripts or muscle-memory that invoked `/adlc-orchestrator`.
+
+### Added
+- **`doc-registry.json`** (plugin root) — single source of truth for the docs/artifacts a project should keep current: path · owner skill · tier (`always` | `agentic`) · kind. Consumed by `session-start.js`, `/lean-doc-generator`, and `/orchestrator`. See **ADR-010**.
+- **ADR-010** — unified doc registry + 3-tier usage model (Daily core · Per-feature · Agentic opt-in). Resolves the doc-layer fragmentation + orchestrator front-door mismatch surfaced by daily-usage signal.
+- **`/lean-doc-generator` doc-set completeness check** (`references/DOC_COMPLETENESS.md`) — registry-driven; reports every doc present/stale/missing and hands off agentic-tier artifacts to their owner skill instead of improvising them.
+- **`/orchestrator` usage-tier on-ramp** — daily/non-agentic work routes to `/prime` + `/lean-doc-generator` without engaging gates.
+- **`skills/orchestrator/references/optimal-flow.md`** — the optimal tier→skill-chain map (daily / per-feature / agentic), with escalate/de-escalate rules.
+- **`tests/unit/`** (zero-dep `node:test`) — first behavioral tests for the executable surface: `doc-registry` integrity (owner→skill drift guard), `session-start` hook (CLAUDE.md gate · tier filter), `init` idempotency. Run: `node --test tests/unit`.
+
+### Changed
+- **graphify CLI install hints** in `bin/adlc-flow-init.js` · `/prime` · `/zoom-out` · `/graph-query` · `/context-engineer` now point to the `/graphify` skill (subscription); CONTEXT skill-roster header de-staled (`v2.1` → current).
+- **graphify integration flow** — ADR-005 (new **§8**), CONTEXT.md, README, and the session-start hint now distinguish the **`/graphify` skill** (semantic pass on the Claude Code subscription · no API key) from the external `graphify .` CLI (adopter API key / local model). `/status` billing caveat documented.
+- **`scripts/session-start.js`** — reads `doc-registry.json` (built-in fallback); missing-artifact warning reframed as **agentic-only**, not a universal nag.
+
+### Fixed
+- **`/lean-doc-generator` (v1.0.1)** — (a) existing docs are no longer blind-skipped: format is diffed against the template/standard and reconciled; (b) template reference is mandatory when a `templates/<NAME>.template` exists (no more improvising from memory).
+
+---
+
 ## [3.0.0] — 2026-05-20
 
 **v3.0 stability checkpoint (Tier A · internal-evidence validated).** Per ADR-009, the plugin earns the v3.0 semver bump on Tier A criteria: structural cleanliness · 5 dogfood trials · 7 post-VG skills exercised against real adopter data · ≥1 mature adopter through P4 · eval pipeline validated at 50-sample scale. Tier B external-adopter evidence becomes the v3.1 gate.
@@ -49,11 +72,11 @@ Tier B becomes earnable when ≥3 of ADR-009's external-adopter unblockers are m
 
 - **`docs/audit/trial-friction-log.md` Trial 5 closing addendum** — v2.8 + v2.9 ship narrative · cumulative 5-trial cross-scoring table · 19 positive-pattern promotions · honest v3.0-deferred-debt list. First closing addendum to formally reconcile a trial's findings against subsequent ships.
 
-- **6 References sections added to SKILL.md files** — closes silent gap where 8 promoted-pattern references existed in `references/` dirs but weren't linked from parent SKILL.md (unreachable to AI navigation). Now linked: `adr-writer` (adr-amendment-pattern) · `adlc-orchestrator` (non-adlc-skill-integration) · `agent-architect` (prompt-caching-pattern + single-call-planner) · `golden-dataset` (mock-first-pov) · `lean-doc-generator` (recon-first-discipline) · `responsibility-map` (form-action-wrappers + preview-gate-ux).
+- **6 References sections added to SKILL.md files** — closes silent gap where 8 promoted-pattern references existed in `references/` dirs but weren't linked from parent SKILL.md (unreachable to AI navigation). Now linked: `adr-writer` (adr-amendment-pattern) · `orchestrator` (non-adlc-skill-integration) · `agent-architect` (prompt-caching-pattern + single-call-planner) · `golden-dataset` (mock-first-pov) · `lean-doc-generator` (recon-first-discipline) · `responsibility-map` (form-action-wrappers + preview-gate-ux).
 
 ### Changed
 
-- **`skills/adlc-orchestrator/SKILL.md` trim to 85 lines** (was 111 · over 100-line cap from v2.9 expansion). Phase descriptions consolidated · Red Flags compacted · "Adopter scenarios" matrix tightened from 10 rows to 8. No behavioral change.
+- **`skills/orchestrator/SKILL.md` trim to 85 lines** (was 111 · over 100-line cap from v2.9 expansion). Phase descriptions consolidated · Red Flags compacted · "Adopter scenarios" matrix tightened from 10 rows to 8. No behavioral change.
 
 - **`.claude-plugin/plugin.json` + `marketplace.json`** — bump to v2.10.0.
 
@@ -76,7 +99,7 @@ Tier B becomes earnable when ≥3 of ADR-009's external-adopter unblockers are m
 
 | Criterion | Status |
 |---|---|
-| 0 structural violations | ✅ (adlc-orchestrator trimmed) |
+| 0 structural violations | ✅ (orchestrator trimmed) |
 | All references linked from parent SKILL.md | ✅ (6 SKILL.md updates) |
 | ≥5 trials documented | ✅ (Trial 1-5 + closing addendum) |
 | 7 post-VG skills exercised | ✅ (temidev/docs/tier3-exercise/ 7 artifacts) |
@@ -103,7 +126,7 @@ Tier B becomes earnable when ≥3 of ADR-009's external-adopter unblockers are m
 
 ### Changed
 
-- **`/adlc-orchestrator` SKILL.md v1.1.0 → v1.2.0** — Description rewritten to explicitly surface "works for ANY project shape" + new "Adopter scenarios" section (F4.13 · deferred since Trial 2). 9-row scenario matrix covering greenfield agentic · greenfield traditional · mature existing (with/without dev-flow) · multi-track · existing ADR convention · existing sprint protocol · Supabase + AI · bilingual · production-ready.
+- **`/orchestrator` SKILL.md v1.1.0 → v1.2.0** — Description rewritten to explicitly surface "works for ANY project shape" + new "Adopter scenarios" section (F4.13 · deferred since Trial 2). 9-row scenario matrix covering greenfield agentic · greenfield traditional · mature existing (with/without dev-flow) · multi-track · existing ADR convention · existing sprint protocol · Supabase + AI · bilingual · production-ready.
 
 ### Marketplace readiness
 
@@ -187,7 +210,7 @@ These remain as v3.0+ candidates. The plugin is now marketplace-ready for the TS
 
 - **`skills/responsibility-map/references/preview-gate-ux.md`** — Promotes the preview-gate + sticky cost banner UX pattern. Closes F7.8. The P3-quality UX expression of RESPONSIBILITY-MAP `human-pre` rows + COST-BUDGET per-call ceiling. Shows compliance flags · cost · regenerate link above generated content. Anti-pattern is rendering AI output as fait-accompli with tiny Publish button.
 
-- **`skills/adlc-orchestrator/references/non-adlc-skill-integration.md`** — Documents recommended hand-off points between ADLC-native skills and specialized non-ADLC skills (`/frontend-design` · `/supabase` · `/security-auditor` · `/skill-creator`) across each phase. Closes F7.4. Validated by Trial 4b's mid-AG `/frontend-design` invocation that polished umkm-indo themes from minor variations into distinct aesthetic worlds.
+- **`skills/orchestrator/references/non-adlc-skill-integration.md`** — Documents recommended hand-off points between ADLC-native skills and specialized non-ADLC skills (`/frontend-design` · `/supabase` · `/security-auditor` · `/skill-creator`) across each phase. Closes F7.4. Validated by Trial 4b's mid-AG `/frontend-design` invocation that polished umkm-indo themes from minor variations into distinct aesthetic worlds.
 
 ### Trial validation
 - 2026-05-20 umkm-indo PoV build (Trial 4b · landing-page MVP). 8 findings surfaced (2 MEDIUM closed in v2.7.0 · 2 LOW closed in v2.7.0 · 4 POSITIVE patterns promoted to references in v2.7.0). 4 ADR-002 tasks completed (1: JSON schema · 2: 3 cache blocks · 3: generateLandingLive · 4: 7 theme components · 5: preview route · 6: 30-sample golden dataset + eval-runner). Mock-mode eval produced honest signal (theme 73% exact · sections-include 0/30 · compliance 19/30) confirming the eval surface works; live baseline deferred to user consent per cost-safety contract (~Rp 30-50k spend).
@@ -230,7 +253,7 @@ These remain as v3.0+ candidates. The plugin is now marketplace-ready for the TS
 ### Positive patterns surfaced (not friction · noted for v2.7+ formalization)
 - **F6.3** Cost-kill-criterion firing at AG saved 1-2 weeks of engineering work. Second cross-trial validation of the kill-criterion discipline. Worth documenting in external-adopter recruitment materials.
 - **F6.4** `AskUserQuestion` one-focused-question + multiple-choice + recommendation pattern proved excellent for HG/SG clarification (10 rounds across the trial). Worth promoting to a shared `references/clarification-flow.md` across rigid skills.
-- **F6.5** Mock-first PoV scaffold pattern (deterministic mock LLM before live wire-up) caught 3 real bugs at $0 cost. Worth documenting as a P3 best practice in `/golden-dataset` or `/adlc-orchestrator`.
+- **F6.5** Mock-first PoV scaffold pattern (deterministic mock LLM before live wire-up) caught 3 real bugs at $0 cost. Worth documenting as a P3 best practice in `/golden-dataset` or `/orchestrator`.
 
 ### Stability
 - v2.6.0 MINOR bump (additive: hypothesis-register accepts new "defer" answer · agent-architect adds new HALT condition · template adds missing column). Single-agent users unaffected; multi-agent users gain a cleaner workflow without breaking changes to existing v2.4/v2.5 multi-agent grids.
@@ -261,7 +284,7 @@ Between the v2.4 ship and the v2.5 multi-agent refinements, the four P1 polish t
 - Validated end-to-end against live `graphify-out/graph.json` for adlc-flow itself: 194 nodes · 316 edges · 16 communities · `graphify query`/`explain`/`path` all return expected results.
 
 **Tooling (TASK-202 + TASK-203 + TASK-205)**
-- **`scripts/eval-acceptance.js`** (TASK-202) — behavioral skill-triggering harness. Mirrors dev-flow's `eval-acceptance.js` with one safety inversion: DRY RUN is the default ($0); `--live` opts into spawning the `claude` CLI for real verification. For each `tests/skill-triggering/prompts/<skill>.txt`, runs 3× and checks stream-json for `"name":"Skill"` AND `"skill":"<expected>"`; ≥2/3 quorum = pass. 8 initial prompts cover `prime` · `adlc-orchestrator` · `hypothesis-register` · `agent-architect` · `responsibility-map` · `pov-gate` · `adr-writer` · `zoom-out`.
+- **`scripts/eval-acceptance.js`** (TASK-202) — behavioral skill-triggering harness. Mirrors dev-flow's `eval-acceptance.js` with one safety inversion: DRY RUN is the default ($0); `--live` opts into spawning the `claude` CLI for real verification. For each `tests/skill-triggering/prompts/<skill>.txt`, runs 3× and checks stream-json for `"name":"Skill"` AND `"skill":"<expected>"`; ≥2/3 quorum = pass. 8 initial prompts cover `prime` · `orchestrator` · `hypothesis-register` · `agent-architect` · `responsibility-map` · `pov-gate` · `adr-writer` · `zoom-out`.
 - **`scripts/audit-baseline.js`** (TASK-203) — Node port of dev-flow's repo-metrics snapshot. Writes `docs/audit/baseline-metrics.{md,json}`. Extends dev-flow's version with skill type (rigid/flexible) breakdown + version column + ADR/template tables. Exits 1 on cap violations for CI use.
 - **`scripts/session-start.js`** (TASK-205) — opt-in auto-update for stale graphify graphs via `ADLC_GRAPHIFY_AUTO_UPDATE=1`. Runs `graphify update .` (AST-only, no LLM cost) when graph >`ADLC_GRAPHIFY_STALE_DAYS` (default 7). Explicitly does NOT auto-run the full-cost `graphify extract`.
 - **`.gitignore` cleanup**: prior blanket `docs/audit/*` ignore would have excluded `trial-friction-log.md` (canonical source of truth) from the first commit. Now ignores only regenerable outputs; keeps trial logs + curated audits tracked. Added `graphify-out/` + `tests/skill-triggering/logs/`.
@@ -312,12 +335,12 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
 **Trial 2 — Traditional-adopter fixes.** Closes the structural framing gap surfaced by the Naraly landing-page dogfood (`docs/audit/trial-friction-log.md` § Trial 2). Per [ADR-007](docs/adr/ADR-007-traditional-adopter-support.md), adlc-flow now serves traditional dev + agentic dev with one orchestrator, supports existing-project adoption, and allows parallel tracks when file-disjoint.
 
 ### Added
-- **`traditional` mode in `adlc-orchestrator`** — non-agentic work (landing pages · APIs · ops tooling · refactors) gets a dedicated mode with no ADLC gates. Dispatches universal skills (`/lean-doc-generator`, `/adr-writer`, `/tdd`, `/pr-reviewer`, `/refactor-advisor`, `/diagnose`, `/release-patch`, `/release-manager`). Closes F4.1.
+- **`traditional` mode in `orchestrator`** — non-agentic work (landing pages · APIs · ops tooling · refactors) gets a dedicated mode with no ADLC gates. Dispatches universal skills (`/lean-doc-generator`, `/adr-writer`, `/tdd`, `/pr-reviewer`, `/refactor-advisor`, `/diagnose`, `/release-patch`, `/release-manager`). Closes F4.1.
 - **`/hypothesis-register --type=` flag** — accepts `agentic` (default · 8-step full procedure) · `conversion` · `latency` · `reliability` · `other` (5-step lighter procedure). Marketing/SLO/reliability hypotheses now have a proper home with kill-criteria pre-commitment. HYPOTHESIS.md gains a `Type` column. Closes F4.6.
 - **ADR-007** `docs/adr/ADR-007-traditional-adopter-support.md` — documents the existing-project + multi-track + traditional-dev support cluster decision.
 
 ### Changed
-- **`adlc-orchestrator` v1.0.0 → v1.1.0** — description names both audiences (agentic + traditional); Mode Dispatch table adds `traditional` row; `init` phase rewritten to handle existing-project gracefully (scaffold missing; skip existing; warn on competing conventions); new `### traditional` phase block; freeform dispatch updated. Closes F4.1 + F4.2.
+- **`orchestrator` v1.0.0 → v1.1.0** — description names both audiences (agentic + traditional); Mode Dispatch table adds `traditional` row; `init` phase rewritten to handle existing-project gracefully (scaffold missing; skip existing; warn on competing conventions); new `### traditional` phase block; freeform dispatch updated. Closes F4.1 + F4.2.
 - **`SPRINT_PROTOCOLS.md`** — new "Parallel Tracks" section permits concurrent active sprints when `files_affected ∩ ∅` (mirrors orchestrator `sprint-bulk` overlap gate). Anti-pattern of "Concurrent Active Sprints touching the SAME files" persists. Closes F4.3.
 - **`/adr-writer` v1.0.0 → v1.1.0** — auto-detects existing ADR convention: `docs/adr/` (modern; preferred) vs `docs/DECISIONS.md` (legacy). Warns + defaults to modern when both present. Procedure.md updated with 7 explicit steps including legacy-mode append protocol. Closes F4.4.
 - **`/hypothesis-register` v1.1.0 → v1.2.0** — `--type` flag support; description no longer excludes traditional work; non-agentic variants skip workflow-step mapping and use type-specific hypothesis templates. Closes F4.6.
@@ -429,12 +452,12 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
 ### Changed
 - **PowerShell hook scripts ported to Node.** `scripts/session-start.js` + `scripts/artifact-integrity.js` replace the v1.0.0 PowerShell originals. Cross-platform parity (Linux/macOS no longer second-class). `hooks/hooks.json` updated.
 - **Cross-plugin namespace dropped.** All `dev-flow:<skill>` references in adlc-flow rewrite to local `/<skill>`. Same skill names, same procedures.
-- `adlc-orchestrator` v0.2.0 → v1.0.0 — updated to dispatch local skills/agents (no more `dev-flow:` prefix); validate phase now includes security/performance/migration analyst dispatch.
+- `orchestrator` v0.2.0 → v1.0.0 — updated to dispatch local skills/agents (no more `dev-flow:` prefix); validate phase now includes security/performance/migration analyst dispatch.
 - `agent-architect` frontmatter — `spawns: dev-flow:adr-writer` → `spawns: adr-writer`.
 - README, CONTEXT.md, USER-OUTCOMES.md — fully refreshed for unified plugin (28 skills · 11 agents · 6 hooks/scripts).
 
 ### Skipped (no port)
-- `dev-flow:orchestrator` — true duplicate of `adlc-orchestrator`. Replaced.
+- `dev-flow:orchestrator` — true duplicate of `orchestrator`. Replaced.
 - `dev-flow:task-decomposer` — overlap with `hypothesis-register` for agentic features; for code-side tasks, write TODO entries directly. Avoids three-skill ambiguity.
 
 ### Superseded
@@ -526,7 +549,7 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
 ### Notes
 - 4 of 5 planned specialist agents shipped (cost-analyst lands in v0.5).
 - 12 of 14 planned skills shipped (cost-budget lands in v0.5).
-- Lifecycle is now end-to-end traversable from `/adlc-orchestrator init` through `operate`.
+- Lifecycle is now end-to-end traversable from `/orchestrator init` through `operate`.
 
 ---
 
@@ -542,7 +565,7 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
 
 ### Notes
 - Agents directory bootstrapped; `agents/` now populated with 2 of 5 planned specialists.
-- `adlc-orchestrator` phase narrative continues to reference v0.3+ skills as live.
+- `orchestrator` phase narrative continues to reference v0.3+ skills as live.
 
 ---
 
@@ -557,10 +580,10 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
 - **`bin/adlc-flow-init.js`** — adopter-project scaffold script. Scaffolds 5 artifact files + 3 empty dirs. Idempotent.
 - **`scripts/eval-skills.js`** — structural eval harness for SKILL.md + agent files (frontmatter · line caps · description rules · red-flags section). Mirrors dev-flow pattern.
 - **5 artifact templates** in `templates/` — HYPOTHESIS, RESPONSIBILITY-MAP, FEEDBACK-LOG, MODEL-UPGRADE-LOG, OBSERVABILITY.
-- **`init` mode** in `adlc-orchestrator` — runs the bin script + confirms scaffold; mirror of dev-flow's init pattern.
+- **`init` mode** in `orchestrator` — runs the bin script + confirms scaffold; mirror of dev-flow's init pattern.
 
 ### Changed
-- `adlc-orchestrator` v0.1.0 → v0.2.0 — added `init` mode + restructured cross-plugin dispatch to fit line cap; phases reference v0.2 skills as live (no longer "v0.2 planned").
+- `orchestrator` v0.1.0 → v0.2.0 — added `init` mode + restructured cross-plugin dispatch to fit line cap; phases reference v0.2 skills as live (no longer "v0.2 planned").
 
 ---
 
@@ -578,7 +601,7 @@ Trial 3 was the first dogfood to fire a kill-criterion path: inter-agent injecti
   - ADR-003 gate naming (HG/SG/AG/VG/RG/MG) rationale
 - **Vendored ADLC source extract** — `docs/research/ADLC-source.md` (~800-word faithful paraphrase with attribution, survives URL rot).
 - **4 v0.1 skills**:
-  - `adlc-orchestrator` — phase-aware dispatcher
+  - `orchestrator` — phase-aware dispatcher
   - `hypothesis-register` — P0 hypothesis + kill-criteria artifact (HG gate)
   - `agent-architect` — P2 ReAct/Plan-Execute/multi-agent decision + ADR (AG gate)
   - `pov-gate` — P3 golden-dataset PoV go/no-go (VG gate)

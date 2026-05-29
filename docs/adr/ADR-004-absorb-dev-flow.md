@@ -29,7 +29,7 @@ User decision (session 2026-05-19): consolidate dev-flow's universal surface INT
 
 ## Decision
 
-**1. adlc-flow absorbs 14 of 16 dev-flow skills + all 6 dev-flow specialist agents.** Selective port — skip true duplicates (`orchestrator`, replaced by `adlc-orchestrator`) and out-of-scope overlap (`task-decomposer`, replaced by `hypothesis-register` for agentic features; code-side tasks go directly into TODO.md).
+**1. adlc-flow absorbs 14 of 16 dev-flow skills + all 6 dev-flow specialist agents.** Selective port — skip true duplicates (`orchestrator`, replaced by `orchestrator`) and out-of-scope overlap (`task-decomposer`, replaced by `hypothesis-register` for agentic features; code-side tasks go directly into TODO.md).
 
 **2. dev-flow is frozen at v4.x.** No new features. CHANGELOG receives a DEPRECATED notice pointing to adlc-flow. Existing dev-flow adopters keep working indefinitely; they migrate at their own pace.
 
